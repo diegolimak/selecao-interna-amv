@@ -1,0 +1,1712 @@
+<title>Seleção Interna AMV</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+/* Layout: wizard de passo único, coluna central, max 700px */
+:root {
+  --bg:         #F1F5FB;
+  --surface:    #FFFFFF;
+  --surface-2:  #EBF0F8;
+  --border:     #D6DDE9;
+  --border-foc: #1C64F2;
+  --fg:         #0E1726;
+  --fg-2:       #374151;
+  --fg-3:       #6B7280;
+  --primary:    #1C64F2;
+  --primary-hv: #1849C6;
+  --primary-lt: #EBF2FF;
+  --secondary:  #6366F1;
+  --success:    #0E9F6E;
+  --success-bg: #ECFDF5;
+  --error:      #DC2626;
+  --error-bg:   #FEF2F2;
+  --warn:       #92400E;
+  --warn-bg:    #FFFBEB;
+  --chip-b:     #DBEAFE; --chip-b-fg: #1D4ED8;
+  --chip-f:     #D1FAE5; --chip-f-fg: #065F46;
+  --dot-wait:   #D1D5DB;
+  --dot-done:   #0E9F6E;
+  --radius:     8px;
+  --radius-lg:  14px;
+  --sh:         0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --sh-lg:      0 4px 24px rgba(0,0,0,.10);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:         #0B1221;
+    --surface:    #121E32;
+    --surface-2:  #1C2D45;
+    --border:     #2A3D56;
+    --border-foc: #60A5FA;
+    --fg:         #F0F4FA;
+    --fg-2:       #C8D4E3;
+    --fg-3:       #7A8EA8;
+    --primary:    #3F83F8;
+    --primary-hv: #60A5FA;
+    --primary-lt: #0E1E38;
+    --secondary:  #818CF8;
+    --success:    #34D399;
+    --success-bg: #052E22;
+    --error:      #F87171;
+    --error-bg:   #1A0808;
+    --warn:       #FCD34D;
+    --warn-bg:    #18100A;
+    --chip-b:     #0E1E38; --chip-b-fg: #60A5FA;
+    --chip-f:     #052E22; --chip-f-fg: #34D399;
+    --dot-wait:   #374151;
+    --dot-done:   #34D399;
+    --sh:         0 1px 3px rgba(0,0,0,.3);
+    --sh-lg:      0 4px 24px rgba(0,0,0,.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#0B1221;--surface:#121E32;--surface-2:#1C2D45;--border:#2A3D56;--border-foc:#60A5FA;
+  --fg:#F0F4FA;--fg-2:#C8D4E3;--fg-3:#7A8EA8;--primary:#3F83F8;--primary-hv:#60A5FA;
+  --primary-lt:#0E1E38;--secondary:#818CF8;--success:#34D399;--success-bg:#052E22;
+  --error:#F87171;--error-bg:#1A0808;--warn:#FCD34D;--warn-bg:#18100A;
+  --chip-b:#0E1E38;--chip-b-fg:#60A5FA;--chip-f:#052E22;--chip-f-fg:#34D399;
+  --dot-wait:#374151;--dot-done:#34D399;
+  --sh:0 1px 3px rgba(0,0,0,.3);--sh-lg:0 4px 24px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body {
+  background:var(--bg);color:var(--fg);
+  font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.65;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:32px;
+}
+h1,h2,h3{font-family:'Sora',system-ui,sans-serif;line-height:1.2;text-wrap:balance}
+
+/* === Wrapper === */
+#app{max-width:700px;margin:0 auto;}
+
+/* === Header === */
+.hd{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+.hd-logo{
+  width:44px;height:44px;border-radius:10px;
+  background:var(--primary);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.hd-logo svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hd-text h1{font-size:1.15rem;margin:0;color:var(--fg)}
+.hd-text p{font-size:0.82rem;color:var(--fg-3);margin:2px 0 0}
+
+/* === Alert boxes === */
+.alert{padding:14px 16px;border-radius:var(--radius);font-size:0.9rem;line-height:1.5;margin-bottom:20px}
+.alert-warn{background:var(--warn-bg);color:var(--warn);border:1px solid currentColor}
+.alert-info{background:var(--primary-lt);color:var(--primary);border:1px solid var(--primary)}
+.alert-success{background:var(--success-bg);color:var(--success);border:1px solid currentColor}
+.alert-error{background:var(--error-bg);color:var(--error);border:1px solid currentColor}
+
+/* === Screen states === */
+.screen{display:none}
+.screen.active{display:block}
+
+.screen-closed,.screen-notopen{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:48px 32px;text-align:center;box-shadow:var(--sh);
+}
+.screen-closed h2,.screen-notopen h2{font-size:1.4rem;margin:0 0 12px;color:var(--fg)}
+.screen-closed p,.screen-notopen p{color:var(--fg-2);margin:0;font-size:0.95rem}
+.icon-xl{font-size:3rem;margin-bottom:16px;display:block}
+
+/* === Progress === */
+.progress-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:20px;box-shadow:var(--sh)}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.progress-label{font-size:0.8rem;font-weight:600;color:var(--fg-3);text-transform:uppercase;letter-spacing:.04em}
+.progress-count{font-size:0.8rem;font-weight:600;color:var(--primary)}
+.progress-bar-track{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--primary);border-radius:3px;transition:width .3s ease}
+.progress-dots{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.progress-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--dot-wait);transition:background .2s;
+  flex-shrink:0;
+}
+.progress-dot.done{background:var(--dot-done)}
+.progress-dot.active{background:var(--primary);box-shadow:0 0 0 3px var(--primary-lt)}
+
+/* === Card step === */
+.step-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:28px;margin-bottom:16px;box-shadow:var(--sh);
+}
+.step-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+.step-title{font-size:1.25rem;font-weight:700;color:var(--fg);margin:0 0 6px}
+.step-desc{font-size:0.9rem;color:var(--fg-2);margin:0 0 24px;border-bottom:1px solid var(--border);padding-bottom:18px}
+
+/* === Field groups === */
+.field-group{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:0.88rem;font-weight:600;color:var(--fg-2)}
+.field label .req{color:var(--error);margin-left:2px}
+.field .hint{font-size:0.8rem;color:var(--fg-3);margin-top:2px}
+.field .err-msg{font-size:0.8rem;color:var(--error);margin-top:3px;display:none}
+.field.has-error input,.field.has-error textarea,.field.has-error select{border-color:var(--error)!important}
+.field.has-error .err-msg{display:block}
+
+/* === Inputs === */
+input[type="text"],input[type="email"],input[type="date"],input[type="number"],
+textarea,select{
+  width:100%;border:1.5px solid var(--border);border-radius:var(--radius);
+  background:var(--surface);color:var(--fg);font-family:inherit;font-size:0.9rem;
+  padding:9px 12px;outline:none;transition:border-color .15s;
+}
+input[type="text"]:focus,input[type="email"]:focus,input[type="date"]:focus,
+input[type="number"]:focus,textarea:focus,select:focus{border-color:var(--border-foc);box-shadow:0 0 0 3px var(--primary-lt)}
+textarea{min-height:100px;resize:vertical;line-height:1.6}
+textarea.tall{min-height:130px}
+input[type="number"]{max-width:240px}
+input[type="date"]{max-width:220px}
+
+/* two-column fields on desktop */
+.field-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:540px){.field-2col{grid-template-columns:1fr}}
+
+/* === Sub-group (indented) === */
+.sub-group{
+  border-left:3px solid var(--primary-lt);padding-left:16px;
+  display:flex;flex-direction:column;gap:14px;margin-top:4px;
+}
+.sub-group-label{font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-3);margin-bottom:2px}
+
+/* === Checkboxes & radios === */
+.check-group,.radio-group{display:flex;flex-direction:column;gap:10px}
+.check-item,.radio-item{
+  display:flex;align-items:flex-start;gap:10px;
+  background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s;
+}
+.check-item:hover,.radio-item:hover{border-color:var(--primary)}
+.check-item.selected,.radio-item.selected{border-color:var(--primary);background:var(--primary-lt)}
+.check-item input,.radio-item input{margin-top:2px;accent-color:var(--primary);flex-shrink:0}
+.check-item-text,.radio-item-text{flex:1;min-width:0}
+.check-item-title,.radio-item-title{font-size:0.9rem;font-weight:600;color:var(--fg)}
+.check-item-sub,.radio-item-sub{font-size:0.8rem;color:var(--fg-3);margin-top:2px}
+
+/* Inline radios (Sim/Não) */
+.radio-inline{display:flex;gap:10px;flex-wrap:wrap}
+.radio-inline label{
+  display:flex;align-items:center;gap:6px;cursor:pointer;
+  background:var(--surface-2);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:8px 14px;font-size:0.88rem;font-weight:500;
+  transition:border-color .15s,background .15s;
+}
+.radio-inline label:has(input:checked){border-color:var(--primary);background:var(--primary-lt);color:var(--primary)}
+.radio-inline input{accent-color:var(--primary)}
+
+/* === Function chips === */
+.fn-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.fn-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+  border-radius:20px;font-size:0.78rem;font-weight:600;
+}
+.fn-chip.backoffice{background:var(--chip-b);color:var(--chip-b-fg)}
+.fn-chip.farmer{background:var(--chip-f);color:var(--chip-f-fg)}
+.fn-chip-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* === Salary info box === */
+.salary-box{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:18px;
+}
+.salary-box h4{font-size:0.85rem;font-weight:700;margin:0 0 8px;color:var(--fg)}
+.salary-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.salary-table th{text-align:left;color:var(--fg-3);font-weight:600;padding:4px 0;border-bottom:1px solid var(--border)}
+.salary-table td{padding:5px 0;color:var(--fg-2)}
+.salary-table td:last-child{font-weight:600;color:var(--fg);text-align:right}
+
+/* === Income total display === */
+.income-total{
+  background:var(--primary-lt);border:1px solid var(--primary);border-radius:var(--radius);
+  padding:12px 16px;display:flex;justify-content:space-between;align-items:center;
+}
+.income-total-label{font-size:0.85rem;font-weight:600;color:var(--primary)}
+.income-total-value{font-size:1.1rem;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums}
+
+/* === Objective block === */
+.objective-block{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:18px;margin-bottom:12px;
+}
+.objective-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.objective-num{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary)}
+.btn-remove-obj{
+  background:none;border:none;color:var(--fg-3);cursor:pointer;padding:2px 6px;
+  border-radius:4px;font-size:0.8rem;transition:color .15s,background .15s;
+}
+.btn-remove-obj:hover{color:var(--error);background:var(--error-bg)}
+
+.btn-add-obj{
+  display:flex;align-items:center;gap:8px;background:none;border:1.5px dashed var(--border);
+  border-radius:var(--radius);color:var(--primary);font-size:0.88rem;font-weight:600;
+  padding:10px 16px;cursor:pointer;width:100%;justify-content:center;transition:border-color .15s;
+}
+.btn-add-obj:hover{border-color:var(--primary);background:var(--primary-lt)}
+
+/* === Navigation === */
+.nav-bar{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:14px 20px;box-shadow:var(--sh);
+}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  border:none;border-radius:var(--radius);font-family:inherit;font-size:0.9rem;
+  font-weight:600;padding:10px 20px;cursor:pointer;transition:background .15s,opacity .15s;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hv)}
+.btn-secondary{background:var(--surface-2);color:var(--fg-2);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-lg{padding:13px 28px;font-size:0.95rem}
+.nav-step-info{font-size:0.82rem;color:var(--fg-3);font-weight:500}
+
+/* === Success screen === */
+.success-screen{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:36px 28px;box-shadow:var(--sh-lg);
+}
+.success-icon{width:56px;height:56px;background:var(--success-bg);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.success-icon svg{width:28px;height:28px;stroke:var(--success);stroke-width:2.5;fill:none}
+.success-screen h2{font-size:1.3rem;margin:0 0 8px}
+.success-screen p{color:var(--fg-2);margin:0 0 20px;font-size:0.9rem}
+
+.report-box{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
+  font-family:monospace;font-size:0.78rem;line-height:1.7;color:var(--fg-2);
+  padding:16px;max-height:320px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;
+  margin-bottom:14px;
+}
+.btn-copy{
+  display:flex;align-items:center;gap:7px;background:var(--surface-2);
+  border:1.5px solid var(--border);border-radius:var(--radius);color:var(--fg-2);
+  font-family:inherit;font-size:0.85rem;font-weight:600;padding:8px 16px;cursor:pointer;
+  transition:border-color .15s;
+}
+.btn-copy:hover{border-color:var(--primary);color:var(--primary)}
+
+/* === Divider === */
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+
+/* === Lookup box (pré-preenchimento Airtable) === */
+.lookup-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:22px;
+  box-shadow:var(--sh);
+}
+.lookup-box-title{
+  display:flex;align-items:center;gap:8px;font-size:.88rem;
+  font-weight:700;color:var(--fg-2);margin-bottom:6px;
+}
+.lookup-box-title svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:var(--primary);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lookup-box select{width:100%;margin-top:2px}
+.lookup-note{font-size:.78rem;color:var(--fg-3);margin:8px 0 0}
+.lookup-filled{font-size:.8rem;color:var(--success);margin:8px 0 0;display:none}
+
+/* === Responsive === */
+@media(max-width:500px){
+  .step-card{padding:20px 16px}
+  .nav-bar{padding:12px 14px}
+  .nav-step-info{display:none}
+  .btn{padding:9px 14px;font-size:0.85rem}
+}
+</style>
+
+<div id="app">
+
+  <!-- Header -->
+  <div class="hd">
+    <div class="hd-logo">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div class="hd-text">
+      <h1>Corretora Amor à Vida</h1>
+      <p>Processo Seletivo Interno · Outubro 2026</p>
+    </div>
+  </div>
+
+  <!-- Screen: Not open yet -->
+  <div id="screenNotOpen" class="screen">
+    <div class="screen-notopen">
+      <span class="icon-xl">📅</span>
+      <h2>As inscrições ainda não estão abertas</h2>
+      <p>O formulário de intenção estará disponível a partir de <strong>21/10/2026</strong>.<br>Retorne nessa data para se inscrever.</p>
+    </div>
+  </div>
+
+  <!-- Screen: Closed -->
+  <div id="screenClosed" class="screen">
+    <div class="screen-closed">
+      <span class="icon-xl">🔒</span>
+      <h2>Inscrições encerradas</h2>
+      <p>As inscrições para estas oportunidades internas foram encerradas em <strong>27/10/2026 às 23h59</strong>, horário de Brasília.<br>Agradecemos seu interesse.</p>
+    </div>
+  </div>
+
+  <!-- Screen: Form -->
+  <div id="screenForm" class="screen">
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Progresso</span>
+        <span class="progress-count" id="progressCount">Etapa 1</span>
+      </div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <form id="mainForm" novalidate>
+
+      <!-- ====== STEP 1: Identificação ====== -->
+      <div class="step-card" id="step1">
+        <div class="step-eyebrow">Etapa 1</div>
+        <h2 class="step-title">Seus dados</h2>
+        <p class="step-desc">Preencha com suas informações atuais na AMV. Todos os campos são obrigatórios.</p>
+
+        <!-- Lookup Airtable -->
+        <div class="lookup-box">
+          <div class="lookup-box-title">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Buscar pelo seu nome
+          </div>
+          <p class="hint" style="margin:0 0 8px">Selecione seu nome para preencher automaticamente os campos disponíveis.</p>
+          <select id="lookupSelect" onchange="applyColaborador(this.value)">
+            <option value="">— Selecione seu nome —</option>
+          </select>
+          <p class="lookup-filled" id="lookupFilled">✓ Dados preenchidos automaticamente. Confira e ajuste se necessário.</p>
+          <p class="lookup-note">⚠ O campo "Cargo atual" não está na base — confirme ou ajuste manualmente.</p>
+        </div>
+
+        <div class="field-group">
+          <div class="field">
+            <label for="q_nome">Nome completo <span class="req">*</span></label>
+            <input type="text" id="q_nome" name="q_nome" autocomplete="name" required>
+            <span class="err-msg">Por favor, informe seu nome completo.</span>
+          </div>
+          <div class="field-2col">
+            <div class="field">
+              <label for="q_area">Área atual <span class="req">*</span></label>
+              <input type="text" id="q_area" name="q_area" placeholder="Ex.: Marketing" required>
+              <span class="err-msg">Campo obrigatório.</span>
+            </div>
+            <div class="field">
+              <label for="q_cargo">Cargo atual <span class="req">*</span></label>
+              <input type="text" id="q_cargo" name="q_cargo" placeholder="Ex.: Assistente" required>
+              <span class="err-msg">Campo obrigatório.</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="q_entrada">Data de entrada na AMV <span class="req">*</span></label>
+            <input type="date" id="q_entrada" name="q_entrada" required>
+            <span class="err-msg">Informe sua data de entrada.</span>
+          </div>
+          <div class="field">
+            <label for="q_gestor">Nome do gestor imediato atual <span class="req">*</span></label>
+            <input type="text" id="q_gestor" name="q_gestor" required>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <div class="field">
+            <label for="q_email">E-mail profissional para contato <span class="req">*</span></label>
+            <input type="email" id="q_email" name="q_email" autocomplete="email" required>
+            <span class="err-msg">Informe um e-mail válido.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 2: Escolha das funções ====== -->
+      <div class="step-card" id="step2" hidden>
+        <div class="step-eyebrow">Etapa 2</div>
+        <h2 class="step-title">Escolha das funções</h2>
+        <p class="step-desc">Leia os descritivos antes de responder. Você pode se candidatar a uma ou às duas funções.</p>
+
+        <!-- Salary info -->
+        <div class="salary-box">
+          <h4>Condições das vagas</h4>
+          <table class="salary-table">
+            <thead><tr><th>Função</th><th>Vagas</th><th>Salário fixo</th></tr></thead>
+            <tbody>
+              <tr><td>Backoffice Comercial</td><td>1</td><td>R$ 2.000,00</td></tr>
+              <tr><td>Consultor Comercial de Relacionamento (Farmer)</td><td>2</td><td>R$ 3.242,00 + variável</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="field-group">
+          <div class="field">
+            <label>Em quais funções você tem interesse? <span class="req">*</span></label>
+            <div class="check-group" id="funcGroup">
+              <label class="check-item" id="labelBackoffice">
+                <input type="checkbox" id="func_backoffice" name="funcoes" value="backoffice" onchange="onFuncChange()">
+                <div class="check-item-text">
+                  <div class="check-item-title">Backoffice Comercial</div>
+                  <div class="check-item-sub">1 vaga · R$ 2.000,00 · Organização, prazos e suporte ao time comercial</div>
+                </div>
+              </label>
+              <label class="check-item" id="labelFarmer">
+                <input type="checkbox" id="func_farmer" name="funcoes" value="farmer" onchange="onFuncChange()">
+                <div class="check-item-text">
+                  <div class="check-item-title">Consultor Comercial de Relacionamento (Farmer)</div>
+                  <div class="check-item-sub">2 vagas · R$ 3.242,00 + bônus por vidas fechadas · Carteira de clientes, renovações e vendas consultivas</div>
+                </div>
+              </label>
+            </div>
+            <span class="err-msg" id="err_funcoes">Selecione ao menos uma função.</span>
+          </div>
+
+          <!-- Q7A/7B: condicional, só aparece quando AMBAS são selecionadas -->
+          <div id="dualChoice" hidden>
+            <div class="alert alert-info">Você selecionou as duas funções. Por isso, responda às duas perguntas abaixo.</div>
+            <div class="field-group">
+              <div class="field">
+                <label>Se precisasse escolher apenas uma função hoje, qual escolheria? <span class="req">*</span></label>
+                <div class="radio-group" id="primeiraOpcaoGroup">
+                  <label class="radio-item">
+                    <input type="radio" name="q7a_primeira_opcao" value="Backoffice Comercial">
+                    <div class="radio-item-text"><div class="radio-item-title">Backoffice Comercial</div></div>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="q7a_primeira_opcao" value="Consultor Comercial de Relacionamento (Farmer)">
+                    <div class="radio-item-text"><div class="radio-item-title">Consultor Comercial de Relacionamento (Farmer)</div></div>
+                  </label>
+                </div>
+                <span class="err-msg" id="err_q7a">Selecione sua primeira opção.</span>
+              </div>
+              <div class="field">
+                <label for="q7b_justificativa">Quais experiências suas sustentam essa escolha? <span class="req">*</span></label>
+                <p class="hint">Explique também o que atrai você na outra função. Use exemplos de atividades que já realizou.</p>
+                <textarea id="q7b_justificativa" name="q7b_justificativa" class="tall" placeholder="Descreva suas experiências e o que atrai você em cada função…"></textarea>
+                <span class="err-msg" id="err_q7b">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 3: Trajetória e Motivação ====== -->
+      <div class="step-card" id="step3" hidden>
+        <div class="step-eyebrow">Etapa 3</div>
+        <h2 class="step-title">Trajetória e motivação</h2>
+        <p class="step-desc">Conte sobre sua história profissional e por que você busca essa oportunidade agora.</p>
+        <div class="field-group">
+          <div class="field">
+            <label for="q8_trajetoria">Conte brevemente sua trajetória profissional e suas atividades atuais <span class="req">*</span></label>
+            <p class="hint">Inclua experiências dentro ou fora da AMV que possam contribuir para as funções escolhidas.</p>
+            <textarea id="q8_trajetoria" name="q8_trajetoria" class="tall" required placeholder="Descreva sua trajetória…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <div class="field">
+            <label for="q9_por_que">Por que você quer trabalhar no Comercial e por que busca essa oportunidade agora? <span class="req">*</span></label>
+            <textarea id="q9_por_que" name="q9_por_que" class="tall" required placeholder="Explique sua motivação…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label>Conte uma iniciativa sua que ajudou a resolver um problema no trabalho <span class="req">*</span></label>
+            <p class="hint">Escolha um caso que demonstre comunicação, organização, análise ou proatividade. Se selecionou as duas funções, explique a relação com cada uma.</p>
+            <div class="sub-group">
+              <div class="field">
+                <div class="sub-group-label">Situação</div>
+                <textarea id="q10a_situacao" name="q10a_situacao" required placeholder="Qual era o contexto e o problema?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <div class="sub-group-label">O que você fez pessoalmente</div>
+                <textarea id="q10b_o_que_fez" name="q10b_o_que_fez" required placeholder="Descreva sua ação…"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <div class="sub-group-label">Resultado</div>
+                <textarea id="q10c_resultado" name="q10c_resultado" required placeholder="O que aconteceu?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 4: Visão e Aprendizado ====== -->
+      <div class="step-card" id="step4" hidden>
+        <div class="step-eyebrow">Etapa 4</div>
+        <h2 class="step-title">Visão e aprendizado</h2>
+        <p class="step-desc">Queremos entender como você enxerga a função e sua disposição para crescer.</p>
+        <div class="field-group">
+          <div class="field">
+            <label for="q11_dia_a_dia">Como você enxerga o dia a dia da função pretendida? <span class="req">*</span></label>
+            <p class="hint">Fale sobre responsabilidades, cobranças e contribuição para os resultados. Se escolheu as duas funções, diferencie as rotinas.</p>
+            <textarea id="q11_dia_a_dia" name="q11_dia_a_dia" class="tall" required placeholder="Descreva como você imagina o dia a dia…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label>Conte uma situação em que aplicou uma orientação ou feedback <span class="req">*</span></label>
+            <p class="hint">Pode ser uma experiência da sua função atual, sem necessidade de experiência prévia em vendas.</p>
+            <div class="sub-group">
+              <div class="field">
+                <div class="sub-group-label">Orientação recebida</div>
+                <textarea id="q12a_orientacao" name="q12a_orientacao" required placeholder="Qual foi a orientação ou feedback?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <div class="sub-group-label">Mudança que você fez</div>
+                <textarea id="q12b_mudanca" name="q12b_mudanca" required placeholder="Como você ajustou seu comportamento ou trabalho?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <div class="sub-group-label">Resultado ou aprendizado</div>
+                <textarea id="q12c_resultado_fb" name="q12c_resultado_fb" required placeholder="O que você observou após a mudança?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="q13_desenvolver">O que você ainda precisa desenvolver para assumir a função? <span class="req">*</span></label>
+            <textarea id="q13_desenvolver" name="q13_desenvolver" required placeholder="Seja honesto sobre seus pontos de desenvolvimento…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 5: Perguntas específicas ====== -->
+      <div class="step-card" id="step5" hidden>
+        <div class="step-eyebrow">Etapa 5</div>
+        <h2 class="step-title">Perguntas específicas por função</h2>
+        <p class="step-desc">Responda as perguntas relacionadas à(s) função(ões) que selecionou.</p>
+        <div class="field-group">
+          <!-- 14A: Backoffice -->
+          <div id="block14A" hidden>
+            <div class="fn-chips"><span class="fn-chip backoffice"><span class="fn-chip-dot"></span>Backoffice Comercial</span></div>
+            <div class="field">
+              <label for="q14a_backoffice">Conte uma experiência em que precisou organizar demandas simultâneas, acompanhar prazos ou resolver pendências. Como definiu prioridades e garantiu a conclusão? <span class="req">*</span></label>
+              <textarea id="q14a_backoffice" name="q14a_backoffice" class="tall" placeholder="Descreva a situação e sua abordagem…"></textarea>
+              <span class="err-msg">Campo obrigatório.</span>
+            </div>
+          </div>
+          <!-- 14B: Farmer -->
+          <div id="block14B" hidden>
+            <div class="fn-chips"><span class="fn-chip farmer"><span class="fn-chip-dot"></span>Consultor Farmer</span></div>
+            <div class="field">
+              <label for="q14b_farmer">Conte uma experiência em que ouviu uma necessidade, construiu confiança e ajudou alguém a chegar a uma solução. Como lidou com dúvidas ou resistência? <span class="req">*</span></label>
+              <p class="hint">Não precisa ser uma experiência de vendas.</p>
+              <textarea id="q14b_farmer" name="q14b_farmer" class="tall" placeholder="Descreva a situação e sua abordagem…"></textarea>
+              <span class="err-msg">Campo obrigatório.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 6: Requisitos Farmer (condicional) ====== -->
+      <div class="step-card" id="step6" hidden>
+        <div class="step-eyebrow">Etapa 6</div>
+        <h2 class="step-title">Requisitos — Consultor Farmer</h2>
+        <p class="step-desc">Por favor, informe sua disponibilidade para os requisitos específicos desta função. Respostas negativas não eliminam automaticamente a candidatura.</p>
+        <div class="field-group">
+          <div class="field">
+            <label>Você possui CNH categoria B? <span class="req">*</span></label>
+            <div class="radio-inline" id="r15a">
+              <label><input type="radio" name="q15a_cnh" value="Sim"> Sim</label>
+              <label><input type="radio" name="q15a_cnh" value="Não"> Não</label>
+            </div>
+            <span class="err-msg" id="err_q15a">Selecione uma opção.</span>
+          </div>
+          <div class="field">
+            <label>Você possui veículo próprio? <span class="req">*</span></label>
+            <div class="radio-inline" id="r15b">
+              <label><input type="radio" name="q15b_veiculo" value="Sim"> Sim</label>
+              <label><input type="radio" name="q15b_veiculo" value="Não"> Não</label>
+            </div>
+            <span class="err-msg" id="err_q15b">Selecione uma opção.</span>
+          </div>
+          <div class="field">
+            <label>Você tem disponibilidade para visitas presenciais e deslocamentos? <span class="req">*</span></label>
+            <div class="radio-inline" id="r15c">
+              <label><input type="radio" name="q15c_visitas" value="Sim"> Sim</label>
+              <label><input type="radio" name="q15c_visitas" value="Não"> Não</label>
+              <label><input type="radio" name="q15c_visitas" value="Preciso esclarecer condições"> Preciso esclarecer</label>
+            </div>
+            <span class="err-msg" id="err_q15c">Selecione uma opção.</span>
+          </div>
+          <div class="field">
+            <label>Você tem disponibilidade para atendimento fora da jornada, por demanda do cliente e com alinhamento com o gestor? <span class="req">*</span></label>
+            <div class="radio-inline" id="r15d">
+              <label><input type="radio" name="q15d_jornada" value="Sim"> Sim</label>
+              <label><input type="radio" name="q15d_jornada" value="Não"> Não</label>
+              <label><input type="radio" name="q15d_jornada" value="Preciso esclarecer condições"> Preciso esclarecer</label>
+            </div>
+            <span class="err-msg" id="err_q15d">Selecione uma opção.</span>
+          </div>
+          <div class="field">
+            <label for="q15_esclarecimentos">Esclarecimentos adicionais sobre disponibilidade (opcional)</label>
+            <textarea id="q15_esclarecimentos" name="q15_esclarecimentos" placeholder="Se marcou 'Preciso esclarecer', detalhe aqui…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 7: Plano de crescimento — Renda ====== -->
+      <div class="step-card" id="step7" hidden>
+        <div class="step-eyebrow">Etapa 7</div>
+        <h2 class="step-title">Plano de crescimento — Renda</h2>
+        <p class="step-desc">As informações de renda servem para planejamento e conversas de desenvolvimento. Não representam promessa de remuneração e não definem aptidão para a vaga.</p>
+        <div class="field-group">
+          <div class="field">
+            <label for="o1_renda_atual">Qual é sua renda profissional média mensal atual? <span class="req">*</span></label>
+            <p class="hint">Informe a média bruta dos últimos 3 meses: salário + variáveis, sem benefícios. Exemplo: R$ 2.000,00 fixo + R$ 500,00 variável = R$ 2.500,00.</p>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--fg-3);font-weight:600">R$</span>
+              <input type="number" id="o1_renda_atual" name="o1_renda_atual" min="0" step="0.01" required placeholder="0,00" oninput="onRendaAtualChange()">
+            </div>
+            <span class="err-msg">Informe sua renda atual.</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label style="font-size:.9rem;font-weight:700;color:var(--fg)">Composição da renda familiar mensal</label>
+            <p class="hint">Considere somente as pessoas que compartilham o orçamento da casa. Não serão solicitados nomes ou documentos.</p>
+            <div class="sub-group" style="margin-top:10px">
+              <div class="field">
+                <label for="o2a_renda_propria">Sua renda mensal <span class="req">*</span></label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="color:var(--fg-3);font-weight:600">R$</span>
+                  <input type="number" id="o2a_renda_propria" name="o2a_renda_propria" min="0" step="0.01" required placeholder="0,00" oninput="calcTotal()">
+                </div>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <label>Renda mensal do cônjuge <span class="req">*</span></label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:500">
+                    <input type="checkbox" id="o2b_na" onchange="toggleConjuge()"> Não se aplica
+                  </label>
+                  <div style="display:flex;align-items:center;gap:8px" id="o2bWrap">
+                    <span style="color:var(--fg-3);font-weight:600">R$</span>
+                    <input type="number" id="o2b_conjuge" name="o2b_conjuge" min="0" step="0.01" placeholder="0,00" oninput="calcTotal()">
+                  </div>
+                </div>
+                <span class="err-msg" id="err_o2b">Informe a renda do cônjuge ou marque "Não se aplica".</span>
+              </div>
+              <div class="field">
+                <label for="o2c_outras">Outras rendas que compõem o orçamento da casa <span class="req">*</span></label>
+                <p class="hint">Não repita sua renda nem a do cônjuge. Informe R$ 0,00 se não houver outras.</p>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="color:var(--fg-3);font-weight:600">R$</span>
+                  <input type="number" id="o2c_outras" name="o2c_outras" min="0" step="0.01" required placeholder="0,00" oninput="calcTotal()">
+                </div>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+          <div class="income-total">
+            <span class="income-total-label">Total da renda familiar mensal</span>
+            <span class="income-total-value" id="o2dDisplay">R$ 0,00</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label style="font-size:.9rem;font-weight:700;color:var(--fg)">Renda profissional mensal pretendida</label>
+            <p class="hint">Valores brutos mensais (fixo + variável), sem benefícios. Exemplos ilustrativos, sem promessa de ganho.</p>
+            <div class="sub-group" style="margin-top:10px">
+              <div class="field-2col">
+                <div class="field">
+                  <label for="o3a_1ano">Em 1 ano <span class="req">*</span></label>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="color:var(--fg-3);font-weight:600">R$</span>
+                    <input type="number" id="o3a_1ano" name="o3a_1ano" min="0" step="0.01" required placeholder="0,00">
+                  </div>
+                  <span class="err-msg">Campo obrigatório.</span>
+                </div>
+                <div class="field">
+                  <label for="o3b_3anos">Em 3 anos <span class="req">*</span></label>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="color:var(--fg-3);font-weight:600">R$</span>
+                    <input type="number" id="o3b_3anos" name="o3b_3anos" min="0" step="0.01" required placeholder="0,00">
+                  </div>
+                  <span class="err-msg">Campo obrigatório.</span>
+                </div>
+              </div>
+              <div class="field">
+                <label for="o3c_5anos">Em 5 anos <span class="req">*</span></label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="color:var(--fg-3);font-weight:600">R$</span>
+                  <input type="number" id="o3c_5anos" name="o3c_5anos" min="0" step="0.01" required placeholder="0,00">
+                </div>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 8: Plano de crescimento — Objetivos ====== -->
+      <div class="step-card" id="step8" hidden>
+        <div class="step-eyebrow">Etapa 8</div>
+        <h2 class="step-title">Plano de crescimento — Objetivos</h2>
+        <p class="step-desc">Informe pelo menos um objetivo. Você pode adicionar até três. Em seguida, conecte sua candidatura ao seu plano profissional.</p>
+        <div class="field-group">
+          <div id="objectivesContainer"></div>
+          <button type="button" class="btn-add-obj" id="btnAddObj" onclick="addObjective()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Adicionar objetivo
+          </button>
+          <hr class="divider">
+          <div class="field" id="fieldO5A">
+            <label for="o5a_conexao">Após conhecer a rotina e a remuneração da vaga, como você enxerga essa oportunidade dentro do seu plano profissional? <span class="req">*</span></label>
+            <p class="hint" id="hintO5A">Relacione as condições da oportunidade com seu momento e suas expectativas.</p>
+            <textarea id="o5a_conexao" name="o5a_conexao" class="tall" required placeholder="Descreva como esta oportunidade se encaixa no seu plano…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <div class="field">
+            <label for="o5b_competencias">Como o desenvolvimento na função escolhida pode contribuir para seus objetivos? <span class="req">*</span></label>
+            <p class="hint">Quais competências, hábitos e ações de trabalho você pretende desenvolver para alcançar resultados profissionais?</p>
+            <textarea id="o5b_competencias" name="o5b_competencias" class="tall" required placeholder="Descreva as competências e hábitos que quer desenvolver…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 9: Encerramento ====== -->
+      <div class="step-card" id="step9" hidden>
+        <div class="step-eyebrow">Etapa 9</div>
+        <h2 class="step-title">Encerramento</h2>
+        <p class="step-desc">Últimas informações antes de enviar sua candidatura.</p>
+        <div class="field-group">
+          <div class="field">
+            <label for="o6_apoio">Que apoio profissional da AMV ajudaria no seu desenvolvimento? <span class="req">*</span></label>
+            <p class="hint">Exemplos: treinamento, orientação, feedback e acompanhamento de resultados.</p>
+            <textarea id="o6_apoio" name="o6_apoio" required placeholder="Descreva que tipo de apoio faria diferença para você…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label>Confirmação de leitura <span class="req">*</span></label>
+            <label class="check-item" id="labelQ16A">
+              <input type="checkbox" id="q16a_leu" name="q16a_leu" onchange="updateCheckStyle('labelQ16A', 'q16a_leu')">
+              <div class="check-item-text">
+                <div class="check-item-title">Li os descritivos das funções escolhidas</div>
+                <div class="check-item-sub">Incluindo atividades, requisitos, remuneração, benefícios e horário.</div>
+              </div>
+            </label>
+            <span class="err-msg" id="err_q16a">Você precisa confirmar a leitura dos descritivos antes de enviar.</span>
+          </div>
+          <div class="field">
+            <label for="q16b_esclarecer">Há alguma condição que você precisa esclarecer antes de avançar? (opcional)</label>
+            <textarea id="q16b_esclarecer" name="q16b_esclarecer" placeholder="Se tiver dúvidas ou condições a esclarecer, descreva aqui…"></textarea>
+          </div>
+          <div class="field">
+            <label for="q17_mais_algo">Há algo mais que gostaria de compartilhar sobre sua candidatura? (opcional)</label>
+            <textarea id="q17_mais_algo" name="q17_mais_algo" placeholder="Informações adicionais que considera relevantes…"></textarea>
+          </div>
+
+          <div class="alert alert-warn" style="font-size:.85rem">
+            <strong>Atenção:</strong> Ao enviar, sua liderança atual será comunicada sobre sua inscrição. A candidatura não garante avanço, aprovação ou transferência. Quem avançar será contatado para entrevistas e avaliação prática.
+          </div>
+        </div>
+      </div>
+
+    </form><!-- end mainForm -->
+
+    <!-- Navigation bar -->
+    <div class="nav-bar" id="navBar">
+      <button type="button" class="btn btn-secondary" id="btnBack" onclick="goBack()" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Voltar
+      </button>
+      <span class="nav-step-info" id="navStepInfo"></span>
+      <button type="button" class="btn btn-primary" id="btnNext" onclick="goNext()">
+        Próximo
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button type="button" class="btn btn-primary btn-lg" id="btnSubmit" hidden onclick="handleSubmit()">
+        Enviar candidatura
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+
+  </div><!-- end screenForm -->
+
+  <!-- Screen: Success -->
+  <div id="screenSuccess" class="screen">
+    <div class="success-screen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Candidatura registrada!</h2>
+      <p>Recebemos sua manifestação de interesse nas oportunidades internas da AMV. Sua candidatura será pré-analisada e você receberá retorno pelo contato informado. Quem avançar receberá as orientações sobre entrevistas e avaliação prática.</p>
+
+      <div class="alert alert-info" style="font-size:.83rem;margin-bottom:20px" id="emailAlert">
+        <strong>📧 Relatório de candidatura gerado.</strong> Copie o texto abaixo e envie para os destinatários, ou configure o envio automático por e-mail.
+      </div>
+
+      <strong style="font-size:.82rem;color:var(--fg-3);text-transform:uppercase;letter-spacing:.05em">Relatório completo</strong>
+      <div class="report-box" id="reportBox"></div>
+      <button class="btn-copy" onclick="copyReport()" id="btnCopy">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copiar relatório
+      </button>
+      <p style="font-size:.78rem;color:var(--fg-3);margin-top:12px">
+        Destinatários: Leandro@corretoraamoravida.com.br · Thais@corretoraamoravida.com.br · andre@corretoraamoravida.com.br
+      </p>
+    </div>
+  </div>
+
+</div><!-- end app -->
+
+<script>
+// ==========================================
+// CONFIGURAÇÃO (alterar antes de publicar)
+// ==========================================
+// Para envio automático de e-mail, crie uma conta gratuita em formspree.io
+// e substitua '' pelo ID do seu formulário (ex: 'xpwzabcd')
+const FORMSPREE_ID = '';
+
+// Colaboradores ativos — extraído do Airtable "Cadastros de Colaboradores" em 21/10/2026
+const COLABORADORES = [
+  {nome:"Amanda de Souza Ramos",       area:"Administrativo",     admissao:"2023-11-06", email:"amanda@corretoraamoravida.com.br",        gestor:""},
+  {nome:"Andre Luiza Silva Souza",      area:"Diretoria",          admissao:"2015-01-01", email:"andre@corretoraamoravida.com.br",          gestor:""},
+  {nome:"Bianca Stephanie Rodrigues de Morais", area:"BackOffice", admissao:"2026-03-09", email:"bianca@corretoraamoravida.com.br",         gestor:"Luiza Lima Dornelles"},
+  {nome:"Caio Miguel de Souza Assis",   area:"Administrativo",     admissao:"2025-01-15", email:"caio@corretoraamoravida.com.br",           gestor:""},
+  {nome:"Dayane Silveira Carlos Souza", area:"Diretoria",          admissao:"2021-08-01", email:"dayane@corretoraamoravida.com.br",         gestor:""},
+  {nome:"Dhiana da Silva Oliveira",     area:"Comercial Saúde",    admissao:"2026-08-10", email:"dhiana@corretoraamoravida.com.br",         gestor:""},
+  {nome:"Diego de Araújo Lima",         area:"Diretoria",          admissao:"2024-08-01", email:"diegolima@corretoraamoravida.com.br",      gestor:""},
+  {nome:"Erica Rodrigues de Souza",     area:"Administrativo",     admissao:"2020-09-17", email:"erica@corretoraamoravida.com.br",          gestor:""},
+  {nome:"Fernanda Souza Rosa",          area:"Pré-Vendas",         admissao:"2026-07-06", email:"fernanda@corretoraamoravida.com.br",       gestor:"Luiza Lima Dornelles"},
+  {nome:"Gabriela Moura Rabelo",        area:"Administrativo",     admissao:"2021-11-03", email:"gabriela@corretoraamoravida.com.br",       gestor:""},
+  {nome:"Geovanna Rocha Mendonça",      area:"Administrativo",     admissao:"2024-10-21", email:"geovanna@corretoraamoravida.com.br",       gestor:""},
+  {nome:"Giselle Cristina Gomes Farias",area:"Comercial Saúde",    admissao:"2022-03-04", email:"giselle@corretoraamoravida.com.br",        gestor:"Thaís Araújo Rebouças"},
+  {nome:"Isabele Lustosa da Silva",     area:"Comercial Saúde",    admissao:"2026-05-18", email:"isabele@corretoraamoravida.com.br",        gestor:"Luiza Lima Dornelles"},
+  {nome:"Jessica do Monte Meira",       area:"Gerência",           admissao:"2020-08-25", email:"jessicameira@corretoraamoravida.com.br",   gestor:""},
+  {nome:"Kaike Augusto Nunes Daltro",   area:"Comercial Saúde",    admissao:"2026-01-05", email:"kaike@corretoraamoravida.com.br",          gestor:"Luiza Lima Dornelles"},
+  {nome:"Kariny Coelho Mendes da Silva",area:"Comercial Saúde",    admissao:"2025-04-01", email:"kariny@corretoraamoravida.com.br",         gestor:"Luiza Lima Dornelles"},
+  {nome:"Kelly Cristina Oliveira Gomes",area:"Administrativo",     admissao:"2022-04-04", email:"kelly@corretoraamoravida.com.br",          gestor:""},
+  {nome:"Kezia de Almeida Marques",     area:"Comercial Saúde",    admissao:"2026-05-18", email:"kezia@corretoraamoravida.com.br",          gestor:"Thaís Araújo Rebouças"},
+  {nome:"Larissa Karen do Nascimento da Silva", area:"Administrativo", admissao:"2026-06-01", email:"larissa@corretoraamoravida.com.br",    gestor:""},
+  {nome:"Leandro Humberto de Souza França", area:"Diretoria",      admissao:"2022-07-01", email:"leandro@corretoraamoravida.com.br",       gestor:""},
+  {nome:"Leticia Santos Franca",        area:"Pré-Vendas",         admissao:"2026-04-13", email:"leticiasantos@corretoraamoravida.com.br",  gestor:"Thaís Araújo Rebouças"},
+  {nome:"Luciane Mota Monteiro",        area:"Administrativo",     admissao:"2026-01-05", email:"luciane@corretoraamoravida.com.br",        gestor:""},
+  {nome:"Luiza Lima Dornelles",         area:"Gerência",           admissao:"2025-01-15", email:"luiza@corretoraamoravida.com.br",          gestor:""},
+  {nome:"Marcelo dos Santos de Oliveira",area:"Administrativo",    admissao:"2024-08-05", email:"marcelo@corretoraamoravida.com.br",        gestor:""},
+  {nome:"Maria Eduarda da Silva de Sa", area:"Marketing",          admissao:"2026-05-11", email:"mariaeduarda@corretoraamoravida.com.br",   gestor:"Diego de Araújo Lima"},
+  {nome:"Marjorie Araujo Guimaraes",    area:"BackOffice",         admissao:"2025-08-04", email:"marjorie@corretoraamoravida.com.br",       gestor:"Thaís Araújo Rebouças"},
+  {nome:"Matheus Oliveira Ribeiro",     area:"Administrativo",     admissao:"2024-03-13", email:"matheus@corretoraamoravida.com.br",        gestor:""},
+  {nome:"Milene Virna Vieira Costa",    area:"Administrativo",     admissao:"2026-09-28", email:"milene@corretoraamoravida.com.br",         gestor:""},
+  {nome:"Rodrigo Henrique Veras",       area:"Comercial Saúde",    admissao:"2023-11-06", email:"rodrigo@corretoraamoravida.com.br",        gestor:"Thaís Araújo Rebouças"},
+  {nome:"Sarah Beatriz de Souza Francelino", area:"Pré-Vendas",   admissao:"2026-04-13", email:"sarahbeatriz@corretoraamoravida.com.br",   gestor:"Thaís Araújo Rebouças"},
+  {nome:"Thaís Araújo Rebouças",        area:"Diretoria",          admissao:"2022-07-01", email:"thais@corretoraamoravida.com.br",          gestor:""},
+  {nome:"Vitor Lorran Lopes de Macedo", area:"Comercial Saúde",    admissao:"2026-01-05", email:"vitor@corretoraamoravida.com.br",          gestor:"Thaís Araújo Rebouças"},
+];
+
+// Datas do processo (fuso America/Sao_Paulo = UTC-3)
+const OPEN_DATE  = new Date('2026-10-20T00:00:00-03:00');
+const CLOSE_DATE = new Date('2026-10-27T23:59:59-03:00');
+
+// ==========================================
+// Estado global
+// ==========================================
+let currentStep = 1;
+let objCount = 1;
+let objIds = [1];
+let submitting = false;
+let reportText = '';
+
+// Mapa de todos os steps lógicos
+const ALL_STEPS = [1,2,3,4,5,6,7,8,9];
+
+function getActiveSteps() {
+  const farmerSelected = document.getElementById('func_farmer')?.checked;
+  return farmerSelected ? ALL_STEPS : ALL_STEPS.filter(s => s !== 6);
+}
+
+function getNextStep(s) {
+  const steps = getActiveSteps();
+  const i = steps.indexOf(s);
+  return i < steps.length - 1 ? steps[i+1] : null;
+}
+
+function getPrevStep(s) {
+  const steps = getActiveSteps();
+  const i = steps.indexOf(s);
+  return i > 0 ? steps[i-1] : null;
+}
+
+// ==========================================
+// Init
+// ==========================================
+function initLookupSelect() {
+  const sel = document.getElementById('lookupSelect');
+  if (!sel) return;
+  COLABORADORES.forEach((c, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = c.nome;
+    sel.appendChild(opt);
+  });
+}
+
+function init() {
+  checkDeadline();
+  initObjectives();
+  initLookupSelect();
+  updateProgress();
+  updateNav();
+  restoreSession();
+
+  // Sync checkbox visual state
+  ['func_backoffice','func_farmer'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', onFuncChange);
+  });
+
+  // Radios visual
+  document.querySelectorAll('.radio-item input').forEach(r => {
+    r.addEventListener('change', () => syncRadioItem(r));
+  });
+  document.querySelectorAll('.radio-inline input').forEach(r => {
+    r.addEventListener('change', () => {});
+  });
+
+  // Save on input
+  document.getElementById('mainForm').addEventListener('input', saveSession);
+  document.getElementById('mainForm').addEventListener('change', saveSession);
+}
+
+// ==========================================
+// Deadline check
+// ==========================================
+function checkDeadline() {
+  const now = new Date();
+  if (now < OPEN_DATE) {
+    showScreen('screenNotOpen');
+  } else if (now > CLOSE_DATE) {
+    showScreen('screenClosed');
+  } else {
+    showScreen('screenForm');
+  }
+}
+
+function showScreen(id) {
+  ['screenNotOpen','screenClosed','screenForm','screenSuccess'].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) { el.classList.remove('active'); }
+  });
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+}
+
+// ==========================================
+// Conditional logic
+// ==========================================
+function onFuncChange() {
+  const b = document.getElementById('func_backoffice').checked;
+  const f = document.getElementById('func_farmer').checked;
+
+  // Dual-choice block
+  const dual = document.getElementById('dualChoice');
+  dual.hidden = !(b && f);
+
+  // Chip labels
+  document.getElementById('labelBackoffice').classList.toggle('selected', b);
+  document.getElementById('labelFarmer').classList.toggle('selected', f);
+
+  // Step 5 blocks
+  const b14A = document.getElementById('block14A');
+  const b14B = document.getElementById('block14B');
+  if (b14A) b14A.hidden = !b;
+  if (b14B) b14B.hidden = !f;
+
+  // q14 required
+  const q14a = document.getElementById('q14a_backoffice');
+  const q14b = document.getElementById('q14b_farmer');
+  if (q14a) q14a.required = b;
+  if (q14b) q14b.required = f;
+
+  // O5A hint update
+  if (b && f) {
+    document.getElementById('hintO5A').textContent = 'Relacione as condições de cada oportunidade com seu momento e suas expectativas. Responda para cada função escolhida.';
+  } else {
+    document.getElementById('hintO5A').textContent = 'Relacione as condições da oportunidade com seu momento e suas expectativas.';
+  }
+
+  updateProgress();
+  saveSession();
+}
+
+function applyColaborador(idx) {
+  const filled = document.getElementById('lookupFilled');
+  if (idx === '') { if (filled) filled.style.display = 'none'; return; }
+  const c = COLABORADORES[parseInt(idx, 10)];
+  if (!c) return;
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+  set('q_nome',    c.nome);
+  set('q_area',    c.area);
+  set('q_entrada', c.admissao);
+  set('q_email',   c.email);
+  if (c.gestor) set('q_gestor', c.gestor);
+  if (filled) filled.style.display = 'block';
+}
+
+function toggleConjuge() {
+  const na = document.getElementById('o2b_na').checked;
+  const wrap = document.getElementById('o2bWrap');
+  const inp = document.getElementById('o2b_conjuge');
+  wrap.hidden = na;
+  inp.required = !na;
+  if (na) inp.value = '';
+  calcTotal();
+}
+
+function onRendaAtualChange() {
+  const v = document.getElementById('o1_renda_atual').value;
+  const o2a = document.getElementById('o2a_renda_propria');
+  if (o2a && !o2a.value) o2a.value = v;
+  calcTotal();
+}
+
+function calcTotal() {
+  const a = parseFloat(document.getElementById('o2a_renda_propria')?.value) || 0;
+  const na = document.getElementById('o2b_na')?.checked;
+  const b = na ? 0 : (parseFloat(document.getElementById('o2b_conjuge')?.value) || 0);
+  const c = parseFloat(document.getElementById('o2c_outras')?.value) || 0;
+  const total = a + b + c;
+  const disp = document.getElementById('o2dDisplay');
+  if (disp) disp.textContent = formatBRL(total);
+}
+
+function syncRadioItem(input) {
+  const group = input.closest('.radio-group');
+  if (!group) return;
+  group.querySelectorAll('.radio-item').forEach(item => {
+    item.classList.toggle('selected', item.querySelector('input')?.checked);
+  });
+}
+
+function updateCheckStyle(labelId, inputId) {
+  const label = document.getElementById(labelId);
+  const input = document.getElementById(inputId);
+  if (label && input) label.classList.toggle('selected', input.checked);
+}
+
+// ==========================================
+// Objectives
+// ==========================================
+function initObjectives() {
+  addObjective();
+}
+
+function addObjective() {
+  if (objIds.length >= 3) return;
+  const id = Date.now();
+  objIds.push(id);
+  const n = objIds.length;
+  const container = document.getElementById('objectivesContainer');
+  const div = document.createElement('div');
+  div.className = 'objective-block';
+  div.id = `obj_${id}`;
+  div.innerHTML = `
+    <div class="objective-header">
+      <span class="objective-num">Objetivo ${n}</span>
+      ${n > 1 ? `<button type="button" class="btn-remove-obj" onclick="removeObjective(${id})">Remover</button>` : ''}
+    </div>
+    <div class="field-group">
+      <div class="field-2col">
+        <div class="field">
+          <label for="o4_sonho_${id}">Sonho ou objetivo <span class="req">*</span></label>
+          <input type="text" id="o4_sonho_${id}" name="o4_sonho_${id}" required placeholder="Ex.: comprar um carro">
+          <span class="err-msg">Campo obrigatório.</span>
+        </div>
+        <div class="field">
+          <label for="o4_custo_${id}">Custo estimado <span class="req">*</span></label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="color:var(--fg-3);font-size:.85rem;font-weight:600">R$</span>
+            <input type="number" id="o4_custo_${id}" name="o4_custo_${id}" min="0" step="0.01" required placeholder="0,00" style="max-width:160px">
+          </div>
+          <span class="err-msg">Campo obrigatório.</span>
+        </div>
+      </div>
+      <div class="field-2col">
+        <div class="field">
+          <label for="o4_prazo_${id}">Prazo pretendido <span class="req">*</span></label>
+          <input type="text" id="o4_prazo_${id}" name="o4_prazo_${id}" required placeholder="Ex.: em 3 anos">
+          <span class="err-msg">Campo obrigatório.</span>
+        </div>
+        <div class="field">
+          <label for="o4_prio_${id}">Prioridade <span class="req">*</span></label>
+          <select id="o4_prio_${id}" name="o4_prio_${id}" required>
+            <option value="">Selecione…</option>
+            <option>Alta</option><option>Média</option><option>Baixa</option>
+          </select>
+          <span class="err-msg">Selecione a prioridade.</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="o4_acao_${id}">Qual ação você pretende começar nos próximos 90 dias para avançar nesse objetivo? <span class="req">*</span></label>
+        <p class="hint">Considere uma ação concreta que dependa de você.</p>
+        <textarea id="o4_acao_${id}" name="o4_acao_${id}" required placeholder="Ex.: iniciar uma reserva mensal e acompanhar o orçamento…"></textarea>
+        <span class="err-msg">Campo obrigatório.</span>
+      </div>
+    </div>
+  `;
+  container.appendChild(div);
+  updateAddObjBtn();
+}
+
+function removeObjective(id) {
+  const idx = objIds.indexOf(id);
+  if (idx < 1) return; // can't remove first
+  objIds.splice(idx, 1);
+  document.getElementById(`obj_${id}`)?.remove();
+  // Renumber
+  document.querySelectorAll('.objective-block').forEach((el, i) => {
+    el.querySelector('.objective-num').textContent = `Objetivo ${i+1}`;
+  });
+  updateAddObjBtn();
+  saveSession();
+}
+
+function updateAddObjBtn() {
+  const btn = document.getElementById('btnAddObj');
+  if (btn) btn.hidden = objIds.length >= 3;
+}
+
+// ==========================================
+// Navigation
+// ==========================================
+function goNext() {
+  if (!validateStep(currentStep)) return;
+  const next = getNextStep(currentStep);
+  if (next) {
+    currentStep = next;
+    updateProgress();
+    updateNav();
+    showCurrentStep();
+    scrollToTop();
+  }
+}
+
+function goBack() {
+  const prev = getPrevStep(currentStep);
+  if (prev !== null) {
+    currentStep = prev;
+    updateProgress();
+    updateNav();
+    showCurrentStep();
+    scrollToTop();
+  }
+}
+
+function showCurrentStep() {
+  ALL_STEPS.forEach(s => {
+    const el = document.getElementById(`step${s}`);
+    if (el) el.hidden = (s !== currentStep);
+  });
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateNav() {
+  const steps = getActiveSteps();
+  const isFirst = currentStep === steps[0];
+  const isLast = currentStep === steps[steps.length - 1];
+
+  document.getElementById('btnBack').disabled = isFirst;
+  document.getElementById('btnNext').hidden = isLast;
+  document.getElementById('btnSubmit').hidden = !isLast;
+
+  const idx = steps.indexOf(currentStep) + 1;
+  document.getElementById('navStepInfo').textContent = `${idx} de ${steps.length}`;
+}
+
+function updateProgress() {
+  const steps = getActiveSteps();
+  const total = steps.length;
+  const idx = steps.indexOf(currentStep) + 1;
+  const pct = Math.round((idx / total) * 100);
+
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = `Etapa ${idx} de ${total}`;
+
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = '';
+  steps.forEach((s, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'progress-dot';
+    if (i < idx - 1) dot.classList.add('done');
+    else if (i === idx - 1) dot.classList.add('active');
+    dots.appendChild(dot);
+  });
+}
+
+// ==========================================
+// Validation
+// ==========================================
+function validateStep(step) {
+  let ok = true;
+
+  if (step === 1) {
+    ok = validateRequired(['q_nome','q_area','q_cargo','q_entrada','q_gestor']) && ok;
+    ok = validateEmail('q_email') && ok;
+  }
+
+  if (step === 2) {
+    const b = document.getElementById('func_backoffice').checked;
+    const f = document.getElementById('func_farmer').checked;
+    const errFn = document.getElementById('err_funcoes');
+    if (!b && !f) {
+      errFn.style.display = 'block';
+      ok = false;
+    } else {
+      errFn.style.display = 'none';
+    }
+
+    if (b && f) {
+      // 7A
+      const q7a = document.querySelector('input[name="q7a_primeira_opcao"]:checked');
+      if (!q7a) { document.getElementById('err_q7a').style.display = 'block'; ok = false; }
+      else { document.getElementById('err_q7a').style.display = 'none'; }
+      // 7B
+      ok = validateRequired(['q7b_justificativa']) && ok;
+    }
+  }
+
+  if (step === 3) {
+    ok = validateRequired(['q8_trajetoria','q9_por_que','q10a_situacao','q10b_o_que_fez','q10c_resultado']) && ok;
+  }
+
+  if (step === 4) {
+    ok = validateRequired(['q11_dia_a_dia','q12a_orientacao','q12b_mudanca','q12c_resultado_fb','q13_desenvolver']) && ok;
+  }
+
+  if (step === 5) {
+    const b = document.getElementById('func_backoffice').checked;
+    const f = document.getElementById('func_farmer').checked;
+    if (b) ok = validateRequired(['q14a_backoffice']) && ok;
+    if (f) ok = validateRequired(['q14b_farmer']) && ok;
+  }
+
+  if (step === 6) {
+    // Farmer requirements
+    ['q15a_cnh','q15b_veiculo','q15c_visitas','q15d_jornada'].forEach(name => {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      const errId = 'err_' + name;
+      const errEl = document.getElementById(errId);
+      if (!checked) { if (errEl) errEl.style.display = 'block'; ok = false; }
+      else { if (errEl) errEl.style.display = 'none'; }
+    });
+  }
+
+  if (step === 7) {
+    ok = validateRequired(['o1_renda_atual','o2a_renda_propria','o2c_outras','o3a_1ano','o3b_3anos','o3c_5anos']) && ok;
+    const na = document.getElementById('o2b_na').checked;
+    if (!na) {
+      const o2b = document.getElementById('o2b_conjuge');
+      const err = document.getElementById('err_o2b');
+      if (!o2b.value) { if (err) err.style.display = 'block'; ok = false; }
+      else { if (err) err.style.display = 'none'; }
+    }
+  }
+
+  if (step === 8) {
+    // Validate all objective blocks
+    objIds.forEach(id => {
+      if (id === 1) {
+        ok = validateRequired([`o4_sonho_${objIds[0]}`,`o4_prazo_${objIds[0]}`,`o4_acao_${objIds[0]}`]) && ok;
+        const prio = document.getElementById(`o4_prio_${objIds[0]}`);
+        if (prio && !prio.value) { markError(prio, true); ok = false; } else if (prio) markError(prio, false);
+        const custo = document.getElementById(`o4_custo_${objIds[0]}`);
+        if (custo && custo.value === '') { markError(custo, true); ok = false; } else if (custo) markError(custo, false);
+      }
+    });
+    // Validate each added objective too
+    document.querySelectorAll('.objective-block').forEach(block => {
+      block.querySelectorAll('[required]').forEach(inp => {
+        const empty = !inp.value.trim();
+        markError(inp, empty);
+        if (empty) ok = false;
+      });
+    });
+    ok = validateRequired(['o5a_conexao','o5b_competencias']) && ok;
+  }
+
+  if (step === 9) {
+    ok = validateRequired(['o6_apoio']) && ok;
+    const leu = document.getElementById('q16a_leu').checked;
+    const errLeu = document.getElementById('err_q16a');
+    if (!leu) { errLeu.style.display = 'block'; ok = false; }
+    else { errLeu.style.display = 'none'; }
+  }
+
+  if (!ok) {
+    // Scroll to first error
+    const firstErr = document.querySelector(`#step${step} .has-error, #step${step} .err-msg[style*="block"]`);
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  return ok;
+}
+
+function validateRequired(ids) {
+  let ok = true;
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const empty = !el.value.trim();
+    markError(el, empty);
+    if (empty) ok = false;
+  });
+  return ok;
+}
+
+function validateEmail(id) {
+  const el = document.getElementById(id);
+  if (!el) return true;
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+  markError(el, !valid);
+  return valid;
+}
+
+function markError(el, hasError) {
+  const field = el.closest('.field');
+  if (!field) return;
+  field.classList.toggle('has-error', hasError);
+}
+
+// ==========================================
+// Session storage (draft persistence)
+// ==========================================
+function saveSession() {
+  try {
+    const data = {};
+    document.getElementById('mainForm').querySelectorAll('[id]').forEach(el => {
+      if (el.type === 'checkbox') data[el.id] = el.checked;
+      else if (el.type === 'radio') { if (el.checked) data['radio_' + el.name] = el.value; }
+      else data[el.id] = el.value;
+    });
+    data['__step'] = currentStep;
+    data['__objIds'] = JSON.stringify(objIds);
+    sessionStorage.setItem('amv_selecao_draft', JSON.stringify(data));
+  } catch(e) {}
+}
+
+function restoreSession() {
+  try {
+    const raw = sessionStorage.getItem('amv_selecao_draft');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([key, val]) => {
+      if (key === '__step' || key === '__objIds') return;
+      if (key.startsWith('radio_')) {
+        document.querySelectorAll(`input[name="${key.slice(6)}"]`).forEach(r => {
+          r.checked = r.value === val;
+        });
+      } else {
+        const el = document.getElementById(key);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = val;
+        else el.value = val;
+      }
+    });
+    // Restore objectives
+    if (data.__objIds) {
+      // rebuild objectives - simplified: just reflect count
+    }
+    const savedStep = data.__step;
+    if (savedStep && ALL_STEPS.includes(savedStep)) {
+      currentStep = savedStep;
+    }
+    showCurrentStep();
+    updateProgress();
+    updateNav();
+    onFuncChange();
+    calcTotal();
+    toggleConjuge();
+  } catch(e) {}
+}
+
+// ==========================================
+// Submit
+// ==========================================
+async function handleSubmit() {
+  if (submitting) return;
+  if (!validateStep(9)) return;
+
+  submitting = true;
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+
+  const report = buildReport();
+  reportText = report;
+
+  // Try Formspree if configured
+  if (FORMSPREE_ID) {
+    try {
+      const fd = collectFormspreeData(report);
+      const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: JSON.stringify(fd)
+      });
+      if (!res.ok) throw new Error('Formspree error');
+      document.getElementById('emailAlert').innerHTML =
+        '<strong>✅ E-mail enviado automaticamente</strong> para Leandro, Thaís e André.';
+    } catch (e) {
+      console.warn('Formspree send failed:', e);
+    }
+  }
+
+  // Clear draft
+  try { sessionStorage.removeItem('amv_selecao_draft'); } catch(e) {}
+
+  // Show success
+  document.getElementById('reportBox').textContent = report;
+  showScreen('screenSuccess');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  submitting = false;
+}
+
+function collectFormspreeData(report) {
+  return {
+    _subject: buildEmailSubject(),
+    _replyto: val('q_email'),
+    nome: val('q_nome'),
+    area_cargo: `${val('q_area')} / ${val('q_cargo')}`,
+    funcoes: getFuncoesStr(),
+    relatorio_completo: report
+  };
+}
+
+function buildEmailSubject() {
+  return `Candidatura interna | ${val('q_nome')} | ${getFuncoesStr()}`;
+}
+
+function getFuncoesStr() {
+  const b = document.getElementById('func_backoffice')?.checked;
+  const f = document.getElementById('func_farmer')?.checked;
+  if (b && f) return 'Backoffice Comercial e Consultor Farmer';
+  if (b) return 'Backoffice Comercial';
+  if (f) return 'Consultor Comercial de Relacionamento (Farmer)';
+  return 'Não selecionado';
+}
+
+function getPrimeiraOpcao() {
+  const b = document.getElementById('func_backoffice')?.checked;
+  const f = document.getElementById('func_farmer')?.checked;
+  if (b && f) {
+    const r = document.querySelector('input[name="q7a_primeira_opcao"]:checked');
+    return r ? r.value : 'Não informado';
+  }
+  if (b) return 'Backoffice Comercial';
+  if (f) return 'Consultor Comercial de Relacionamento (Farmer)';
+  return 'Não informado';
+}
+
+// ==========================================
+// Report builder
+// ==========================================
+function buildReport() {
+  const id = generateId();
+  const now = new Date();
+  const dataHora = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo',
+    year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' }) + ' (Brasília)';
+
+  const b = document.getElementById('func_backoffice')?.checked;
+  const f = document.getElementById('func_farmer')?.checked;
+
+  let r = '';
+  r += '═══════════════════════════════════════════════════\n';
+  r += '  CANDIDATURA INTERNA — CORRETORA AMOR À VIDA\n';
+  r += '═══════════════════════════════════════════════════\n\n';
+  r += `Assunto: Candidatura interna | ${val('q_nome')} | ${getFuncoesStr()}\n\n`;
+  r += 'Recebemos uma nova manifestação de interesse nas\n';
+  r += 'oportunidades internas do Comercial da AMV.\n\n';
+
+  r += '─── RESUMO DA CANDIDATURA ──────────────────────────\n';
+  r += `Colaborador:              ${val('q_nome')}\n`;
+  r += `Área e cargo atuais:      ${val('q_area')} / ${val('q_cargo')}\n`;
+  r += `Tempo de casa:            ${tempoNaEmpresa(val('q_entrada'))}\n`;
+  r += `Funções escolhidas:       ${getFuncoesStr()}\n`;
+  r += `Primeira opção:           ${getPrimeiraOpcao()}\n`;
+  r += `Identificador:            ${id}\n`;
+  r += `Data/hora de recebimento: ${dataHora}\n`;
+  r += `Data de entrada na AMV:   ${val('q_entrada') ? formatDate(val('q_entrada')) : '—'}\n`;
+  r += `Gestor imediato atual:    ${val('q_gestor')}\n`;
+  r += `Contato profissional:     ${val('q_email')}\n\n`;
+
+  r += '─── RESPOSTAS COMPLETAS ────────────────────────────\n\n';
+
+  if (b && f) {
+    r += '[7B] EXPERIÊNCIAS QUE SUSTENTAM A ESCOLHA\n';
+    r += block(val('q7b_justificativa')) + '\n';
+  }
+
+  r += '[8] TRAJETÓRIA PROFISSIONAL E ATIVIDADES ATUAIS\n';
+  r += block(val('q8_trajetoria')) + '\n';
+
+  r += '[9] POR QUE O COMERCIAL E POR QUE AGORA\n';
+  r += block(val('q9_por_que')) + '\n';
+
+  r += '[10] INICIATIVA PESSOAL — RESOLUÇÃO DE PROBLEMA\n';
+  r += `  Situação:\n${block(val('q10a_situacao'))}\n`;
+  r += `  O que fez pessoalmente:\n${block(val('q10b_o_que_fez'))}\n`;
+  r += `  Resultado:\n${block(val('q10c_resultado'))}\n`;
+
+  r += '[11] VISÃO DO DIA A DIA DA FUNÇÃO\n';
+  r += block(val('q11_dia_a_dia')) + '\n';
+
+  r += '[12] ORIENTAÇÃO OU FEEDBACK APLICADO\n';
+  r += `  Orientação recebida:\n${block(val('q12a_orientacao'))}\n`;
+  r += `  Mudança que fez:\n${block(val('q12b_mudanca'))}\n`;
+  r += `  Resultado/aprendizado:\n${block(val('q12c_resultado_fb'))}\n`;
+
+  r += '[13] O QUE AINDA PRECISA DESENVOLVER\n';
+  r += block(val('q13_desenvolver')) + '\n';
+
+  if (b) {
+    r += '[14A] BACKOFFICE — ORGANIZAÇÃO E PRAZOS\n';
+    r += block(val('q14a_backoffice')) + '\n';
+  }
+  if (f) {
+    r += '[14B] FARMER — ESCUTA E CONSTRUÇÃO DE CONFIANÇA\n';
+    r += block(val('q14b_farmer')) + '\n';
+  }
+
+  if (f) {
+    r += '[15] REQUISITOS — CONSULTOR FARMER\n';
+    r += `  CNH categoria B:                       ${radioVal('q15a_cnh')}\n`;
+    r += `  Veículo próprio:                       ${radioVal('q15b_veiculo')}\n`;
+    r += `  Disponibilidade para visitas:          ${radioVal('q15c_visitas')}\n`;
+    r += `  Disponibilidade fora da jornada:       ${radioVal('q15d_jornada')}\n`;
+    const esc = val('q15_esclarecimentos');
+    if (esc) { r += `  Esclarecimentos:\n${block(esc)}\n`; }
+    r += '\n';
+  }
+
+  r += '[16A] LEITURA DOS DESCRITIVOS: ' + (document.getElementById('q16a_leu')?.checked ? 'Confirmado' : 'Não confirmado') + '\n\n';
+
+  const q16b = val('q16b_esclarecer');
+  r += '[16B] CONDIÇÕES A ESCLARECER:\n' + block(q16b || 'Nenhuma') + '\n';
+
+  const q17 = val('q17_mais_algo');
+  r += '[17] OBSERVAÇÕES ADICIONAIS:\n' + block(q17 || 'Nenhuma') + '\n';
+
+  r += '─── PLANO DE CRESCIMENTO ───────────────────────────\n\n';
+
+  r += 'RENDA ATUAL\n';
+  r += `  Renda profissional média mensal (bruta): ${formatBRL(val('o1_renda_atual'))}\n\n`;
+
+  r += 'COMPOSIÇÃO DA RENDA FAMILIAR MENSAL\n';
+  r += `  Sua renda:              ${formatBRL(val('o2a_renda_propria'))}\n`;
+  const naConj = document.getElementById('o2b_na')?.checked;
+  r += `  Renda do cônjuge:       ${naConj ? 'Não se aplica' : formatBRL(val('o2b_conjuge'))}\n`;
+  r += `  Outras rendas:          ${formatBRL(val('o2c_outras'))}\n`;
+  const a = parseFloat(val('o2a_renda_propria'))||0;
+  const bv = naConj ? 0 : (parseFloat(val('o2b_conjuge'))||0);
+  const cv = parseFloat(val('o2c_outras'))||0;
+  r += `  Total familiar:         ${formatBRL(a+bv+cv)}\n\n`;
+
+  r += 'RENDA PRETENDIDA\n';
+  r += `  Em 1 ano:  ${formatBRL(val('o3a_1ano'))}\n`;
+  r += `  Em 3 anos: ${formatBRL(val('o3b_3anos'))}\n`;
+  r += `  Em 5 anos: ${formatBRL(val('o3c_5anos'))}\n\n`;
+
+  r += 'OBJETIVOS\n';
+  document.querySelectorAll('.objective-block').forEach((blk, i) => {
+    const idx = i + 1;
+    // Get ids from inputs
+    const sonhoId = blk.querySelector('[id^="o4_sonho"]')?.id;
+    const objSuffix = sonhoId ? sonhoId.replace('o4_sonho_','') : '';
+    r += `  Objetivo ${idx}:\n`;
+    r += `    Sonho/Objetivo:    ${val(`o4_sonho_${objSuffix}`)}\n`;
+    r += `    Custo estimado:    ${formatBRL(val(`o4_custo_${objSuffix}`))}\n`;
+    r += `    Prazo:             ${val(`o4_prazo_${objSuffix}`)}\n`;
+    r += `    Prioridade:        ${val(`o4_prio_${objSuffix}`)}\n`;
+    r += `    Ação em 90 dias:\n${block(val(`o4_acao_${objSuffix}`))}\n`;
+  });
+
+  r += '[O5A] ESTA OPORTUNIDADE NO MEU PLANO PROFISSIONAL\n';
+  r += block(val('o5a_conexao')) + '\n';
+
+  r += '[O5B] COMO O DESENVOLVIMENTO NA FUNÇÃO CONTRIBUI PARA MEUS OBJETIVOS\n';
+  r += block(val('o5b_competencias')) + '\n';
+
+  r += '[O6] APOIO ESPERADO DA AMV\n';
+  r += block(val('o6_apoio')) + '\n';
+
+  r += '─────────────────────────────────────────────────────\n';
+  r += 'Este registro é uma manifestação de interesse para\n';
+  r += 'pré-análise. A decisão de avanço será realizada pela\n';
+  r += 'direção e gestão comercial.\n';
+
+  return r;
+}
+
+// ==========================================
+// Helpers
+// ==========================================
+function val(id) {
+  return (document.getElementById(id)?.value || '').trim();
+}
+function radioVal(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || 'Não informado';
+}
+function block(text) {
+  if (!text) return '  (não preenchido)\n';
+  return text.split('\n').map(l => '  ' + l).join('\n') + '\n';
+}
+function formatBRL(v) {
+  const n = parseFloat(v) || 0;
+  return n.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+}
+function formatDate(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function generateId() {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rnd = Math.random().toString(36).slice(2,6).toUpperCase();
+  return `AMV-${ts}-${rnd}`;
+}
+function tempoNaEmpresa(iso) {
+  if (!iso) return 'Não informado';
+  const entrada = new Date(iso + 'T12:00:00');
+  const hoje = new Date();
+  let anos = hoje.getFullYear() - entrada.getFullYear();
+  let meses = hoje.getMonth() - entrada.getMonth();
+  if (meses < 0) { anos--; meses += 12; }
+  const pa = anos === 1 ? 'ano' : 'anos';
+  const pm = meses === 1 ? 'mês' : 'meses';
+  if (anos === 0) return `${meses} ${pm}`;
+  if (meses === 0) return `${anos} ${pa}`;
+  return `${anos} ${pa} e ${meses} ${pm}`;
+}
+
+async function copyReport() {
+  const btn = document.getElementById('btnCopy');
+  try {
+    await navigator.clipboard.writeText(reportText);
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => { btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar relatório'; }, 2000);
+  } catch {
+    // Fallback: select text
+    const box = document.getElementById('reportBox');
+    const range = document.createRange();
+    range.selectNodeContents(box);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    btn.textContent = 'Texto selecionado — use Ctrl+C';
+  }
+}
+
+// ==========================================
+// Boot
+// ==========================================
+document.addEventListener('DOMContentLoaded', init);
+</script>
