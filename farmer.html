@@ -1,0 +1,936 @@
+<title>Seleção Interna — Consultor Farmer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+:root {
+  --bg:#F1F5FB;--surface:#FFFFFF;--surface-2:#EBF0F8;--border:#D6DDE9;--border-foc:#1C64F2;
+  --fg:#0E1726;--fg-2:#374151;--fg-3:#6B7280;--primary:#1C64F2;--primary-hv:#1849C6;
+  --primary-lt:#EBF2FF;--secondary:#6366F1;--success:#0E9F6E;--success-bg:#ECFDF5;
+  --error:#DC2626;--error-bg:#FEF2F2;--warn:#92400E;--warn-bg:#FFFBEB;
+  --chip-b:#DBEAFE;--chip-b-fg:#1D4ED8;--dot-wait:#D1D5DB;--dot-done:#0E9F6E;
+  --radius:8px;--radius-lg:14px;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --sh-lg:0 4px 24px rgba(0,0,0,.10);color-scheme:light;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B1221;--surface:#121E32;--surface-2:#1C2D45;--border:#2A3D56;--border-foc:#60A5FA;
+  --fg:#F0F4FA;--fg-2:#C8D4E3;--fg-3:#7A8EA8;--primary:#3F83F8;--primary-hv:#60A5FA;
+  --primary-lt:#0E1E38;--success:#34D399;--success-bg:#052E22;--error:#F87171;
+  --error-bg:#1A0808;--warn:#FCD34D;--warn-bg:#18100A;--chip-b:#0E1E38;--chip-b-fg:#60A5FA;
+  --dot-wait:#374151;--dot-done:#34D399;--sh:0 1px 3px rgba(0,0,0,.3);--sh-lg:0 4px 24px rgba(0,0,0,.5);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0B1221;--surface:#121E32;--surface-2:#1C2D45;--border:#2A3D56;--border-foc:#60A5FA;
+  --fg:#F0F4FA;--fg-2:#C8D4E3;--fg-3:#7A8EA8;--primary:#3F83F8;--primary-hv:#60A5FA;
+  --primary-lt:#0E1E38;--success:#34D399;--success-bg:#052E22;--error:#F87171;
+  --error-bg:#1A0808;--warn:#FCD34D;--warn-bg:#18100A;--chip-b:#0E1E38;--chip-b-fg:#60A5FA;
+  --dot-wait:#374151;--dot-done:#34D399;--sh:0 1px 3px rgba(0,0,0,.3);--sh-lg:0 4px 24px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,sans-serif;font-size:15px;
+  line-height:1.65;margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px;}
+h1,h2,h3{font-family:'Sora',system-ui,sans-serif;line-height:1.2;text-wrap:balance}
+#app{max-width:700px;margin:0 auto;}
+.hd{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+.hd-logo{width:44px;height:44px;border-radius:10px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hd-logo svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hd-text h1{font-size:1.15rem;margin:0;color:var(--fg)}
+.hd-text p{font-size:0.82rem;color:var(--fg-3);margin:2px 0 0}
+.alert{padding:14px 16px;border-radius:var(--radius);font-size:0.9rem;line-height:1.5;margin-bottom:20px}
+.alert-warn{background:var(--warn-bg);color:var(--warn);border:1px solid currentColor}
+.alert-info{background:var(--primary-lt);color:var(--primary);border:1px solid var(--primary)}
+.alert-success{background:var(--success-bg);color:var(--success);border:1px solid currentColor}
+.screen{display:none}.screen.active{display:block}
+.screen-closed,.screen-notopen{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:48px 32px;text-align:center;box-shadow:var(--sh);}
+.screen-closed h2,.screen-notopen h2{font-size:1.4rem;margin:0 0 12px;color:var(--fg)}
+.screen-closed p,.screen-notopen p{color:var(--fg-2);margin:0;font-size:0.95rem}
+.icon-xl{font-size:3rem;margin-bottom:16px;display:block}
+.progress-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:20px;box-shadow:var(--sh)}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.progress-label{font-size:0.8rem;font-weight:600;color:var(--fg-3);text-transform:uppercase;letter-spacing:.04em}
+.progress-count{font-size:0.8rem;font-weight:600;color:var(--primary)}
+.progress-bar-track{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--primary);border-radius:3px;transition:width .3s ease}
+.progress-dots{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.progress-dot{width:8px;height:8px;border-radius:50%;background:var(--dot-wait);transition:background .2s;flex-shrink:0;}
+.progress-dot.done{background:var(--dot-done)}.progress-dot.active{background:var(--primary);box-shadow:0 0 0 3px var(--primary-lt)}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:16px;box-shadow:var(--sh);}
+.step-eyebrow{font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);margin-bottom:8px}
+.step-title{font-size:1.25rem;font-weight:700;color:var(--fg);margin:0 0 6px}
+.step-desc{font-size:0.9rem;color:var(--fg-2);margin:0 0 24px;border-bottom:1px solid var(--border);padding-bottom:18px}
+.field-group{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:0.88rem;font-weight:600;color:var(--fg-2)}
+.field label .req{color:var(--error);margin-left:2px}
+.field .hint{font-size:0.8rem;color:var(--fg-3);margin-top:2px}
+.field .err-msg{font-size:0.8rem;color:var(--error);margin-top:3px;display:none}
+.field.has-error input,.field.has-error textarea,.field.has-error select{border-color:var(--error)!important}
+.field.has-error .err-msg{display:block}
+input[type="text"],input[type="email"],input[type="date"],input[type="number"],textarea,select{
+  width:100%;border:1.5px solid var(--border);border-radius:var(--radius);
+  background:var(--surface);color:var(--fg);font-family:inherit;font-size:0.9rem;
+  padding:9px 12px;outline:none;transition:border-color .15s;}
+input[type="text"]:focus,input[type="email"]:focus,input[type="date"]:focus,
+input[type="number"]:focus,textarea:focus,select:focus{border-color:var(--border-foc);box-shadow:0 0 0 3px var(--primary-lt)}
+textarea{min-height:100px;resize:vertical;line-height:1.6}
+textarea.tall{min-height:130px}
+input[type="number"]{max-width:240px}
+input[type="date"]{max-width:220px}
+.field-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:540px){.field-2col{grid-template-columns:1fr}}
+.sub-group{border-left:3px solid var(--primary-lt);padding-left:16px;display:flex;flex-direction:column;gap:14px;margin-top:4px;}
+.sub-group-label{font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-3);margin-bottom:2px}
+.check-item{display:flex;align-items:flex-start;gap:10px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s;}
+.check-item:hover{border-color:var(--primary)}
+.check-item.selected{border-color:var(--primary);background:var(--primary-lt)}
+.check-item input{margin-top:2px;accent-color:var(--primary);flex-shrink:0}
+.check-item-text{flex:1;min-width:0}
+.check-item-title{font-size:0.9rem;font-weight:600;color:var(--fg)}
+.check-item-sub{font-size:0.8rem;color:var(--fg-3);margin-top:2px}
+.income-total{background:var(--primary-lt);border:1px solid var(--primary);border-radius:var(--radius);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+.income-total-label{font-size:0.85rem;font-weight:600;color:var(--primary)}
+.income-total-value{font-size:1.1rem;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums}
+.objective-block{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:12px;}
+.objective-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.objective-num{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary)}
+.btn-remove-obj{background:none;border:none;color:var(--fg-3);cursor:pointer;padding:2px 6px;border-radius:4px;font-size:0.8rem;transition:color .15s,background .15s;}
+.btn-remove-obj:hover{color:var(--error);background:var(--error-bg)}
+.btn-add-obj{display:flex;align-items:center;gap:8px;background:none;border:1.5px dashed var(--border);border-radius:var(--radius);color:var(--primary);font-size:0.88rem;font-weight:600;padding:10px 16px;cursor:pointer;width:100%;justify-content:center;transition:border-color .15s;}
+.btn-add-obj:hover{border-color:var(--primary);background:var(--primary-lt)}
+.nav-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 20px;box-shadow:var(--sh);}
+.btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:var(--radius);font-family:inherit;font-size:0.9rem;font-weight:600;padding:10px 20px;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-hv)}
+.btn-secondary{background:var(--surface-2);color:var(--fg-2);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-lg{padding:13px 28px;font-size:0.95rem}
+.nav-step-info{font-size:0.82rem;color:var(--fg-3);font-weight:500}
+.success-screen{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 28px;box-shadow:var(--sh-lg);}
+.success-icon{width:56px;height:56px;background:var(--success-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.success-icon svg{width:28px;height:28px;stroke:var(--success);stroke-width:2.5;fill:none}
+.success-screen h2{font-size:1.3rem;margin:0 0 8px}
+.success-screen p{color:var(--fg-2);margin:0 0 20px;font-size:0.9rem}
+.report-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);font-family:monospace;font-size:0.78rem;line-height:1.7;color:var(--fg-2);padding:16px;max-height:320px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;margin-bottom:14px;}
+.btn-copy{display:flex;align-items:center;gap:7px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--fg-2);font-family:inherit;font-size:0.85rem;font-weight:600;padding:8px 16px;cursor:pointer;transition:border-color .15s;}
+.btn-copy:hover{border-color:var(--primary);color:var(--primary)}
+.job-desc{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:18px;}
+.job-desc h4{font-size:0.85rem;font-weight:700;color:var(--fg);margin:0 0 10px;font-family:'Sora',system-ui,sans-serif;}
+.job-desc ul{margin:0;padding:0 0 0 18px;font-size:0.85rem;color:var(--fg-2);line-height:1.75;}
+.job-desc-section{margin-bottom:14px}
+.job-desc-section:last-child{margin-bottom:0}
+.job-tag{display:inline-block;background:var(--chip-b);color:var(--chip-b-fg);font-size:0.75rem;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.lookup-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:22px;box-shadow:var(--sh);}
+.lookup-box-title{display:flex;align-items:center;gap:8px;font-size:.88rem;font-weight:700;color:var(--fg-2);margin-bottom:6px;}
+.lookup-box-title svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:var(--primary);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lookup-box select{width:100%;margin-top:2px}
+.lookup-note{font-size:.78rem;color:var(--fg-3);margin:8px 0 0}
+.lookup-filled{font-size:.8rem;color:var(--success);margin:8px 0 0;display:none}
+.req-item{display:flex;align-items:flex-start;gap:10px;background:var(--warn-bg);border:1.5px solid var(--warn);border-radius:var(--radius);padding:12px 14px;}
+.req-item-text{flex:1;font-size:.85rem;color:var(--warn);line-height:1.5}
+.req-item-title{font-weight:700;font-size:.85rem}
+@media(max-width:500px){.step-card{padding:20px 16px}.nav-bar{padding:12px 14px}.nav-step-info{display:none}.btn{padding:9px 14px;font-size:0.85rem}}
+</style>
+
+<div id="app">
+
+  <div class="hd">
+    <div class="hd-logo">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div class="hd-text">
+      <h1>Corretora Amor à Vida</h1>
+      <p>Processo Seletivo Interno · Consultor Farmer · Outubro 2026</p>
+    </div>
+  </div>
+
+  <div id="screenNotOpen" class="screen">
+    <div class="screen-notopen">
+      <span class="icon-xl">📅</span>
+      <h2>As inscrições ainda não estão abertas</h2>
+      <p>O formulário estará disponível a partir de <strong>21/10/2026</strong>.<br>Retorne nessa data para se inscrever.</p>
+    </div>
+  </div>
+
+  <div id="screenClosed" class="screen">
+    <div class="screen-closed">
+      <span class="icon-xl">🔒</span>
+      <h2>Inscrições encerradas</h2>
+      <p>As inscrições para esta oportunidade foram encerradas em <strong>27/10/2026 às 23h59</strong>, horário de Brasília.<br>Agradecemos seu interesse.</p>
+    </div>
+  </div>
+
+  <div id="screenForm" class="screen">
+
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Progresso</span>
+        <span class="progress-count" id="progressCount">Etapa 1</span>
+      </div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <form id="mainForm" novalidate>
+
+      <!-- STEP 1: Identificação -->
+      <div class="step-card" id="step1">
+        <div class="step-eyebrow">Etapa 1 de 7</div>
+        <h2 class="step-title">Seus dados</h2>
+        <p class="step-desc">Preencha com suas informações atuais na AMV. Todos os campos são obrigatórios.</p>
+
+        <div class="lookup-box">
+          <div class="lookup-box-title">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Buscar pelo seu nome
+          </div>
+          <p class="hint" style="margin:0 0 8px">Selecione seu nome para preencher automaticamente os campos disponíveis.</p>
+          <select id="lookupSelect" onchange="applyColaborador(this.value)">
+            <option value="">— Selecione seu nome —</option>
+          </select>
+          <p class="lookup-filled" id="lookupFilled">✓ Dados preenchidos automaticamente. Confira e ajuste se necessário.</p>
+          <p class="lookup-note">⚠ O campo "Cargo atual" não está na base — selecione manualmente abaixo.</p>
+        </div>
+
+        <div class="field-group">
+          <div class="field">
+            <label for="q_nome">Nome completo <span class="req">*</span></label>
+            <input type="text" id="q_nome" name="q_nome" autocomplete="name" required>
+            <span class="err-msg">Por favor, informe seu nome completo.</span>
+          </div>
+          <div class="field-2col">
+            <div class="field">
+              <label for="q_area">Área atual <span class="req">*</span></label>
+              <input type="text" id="q_area" name="q_area" placeholder="Ex.: Comercial Saúde" required>
+              <span class="err-msg">Campo obrigatório.</span>
+            </div>
+            <div class="field">
+              <label for="q_cargo">Cargo atual <span class="req">*</span></label>
+              <select id="q_cargo" name="q_cargo" required>
+                <option value="">— Selecione seu cargo —</option>
+                <option>Assistente Administrativo(a)</option>
+                <option>Auxiliar Administrativo(a)</option>
+                <option>Backoffice Comercial</option>
+                <option>BDR (Business Development Representative)</option>
+                <option>Consultor(a) Comercial</option>
+                <option>Consultor(a) de Renovações</option>
+                <option>Pré-vendas</option>
+                <option>Suporte / Atendimento ao Cliente</option>
+                <option>Assistente de Marketing</option>
+                <option>Outro</option>
+              </select>
+              <span class="err-msg">Selecione seu cargo atual.</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="q_entrada">Data de entrada na AMV <span class="req">*</span></label>
+            <input type="date" id="q_entrada" name="q_entrada" required>
+            <span class="err-msg">Informe sua data de entrada.</span>
+          </div>
+          <div class="field">
+            <label for="q_gestor">Nome do gestor imediato atual <span class="req">*</span></label>
+            <input type="text" id="q_gestor" name="q_gestor" required>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <div class="field">
+            <label for="q_email">E-mail profissional para contato <span class="req">*</span></label>
+            <input type="email" id="q_email" name="q_email" autocomplete="email" required>
+            <span class="err-msg">Informe um e-mail válido.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Vaga e confirmação -->
+      <div class="step-card" id="step2" hidden>
+        <div class="step-eyebrow">Etapa 2 de 7</div>
+        <h2 class="step-title">A vaga — Consultor Farmer</h2>
+        <p class="step-desc">Leia com atenção o descritivo completo antes de prosseguir, incluindo os requisitos obrigatórios da função.</p>
+
+        <span class="job-tag">1 vaga · Comissionado + Fixo · CLT</span>
+
+        <div class="job-desc">
+          <div class="job-desc-section">
+            <h4>O que é o Consultor Farmer na AMV</h4>
+            <p style="font-size:.88rem;color:var(--fg-2);line-height:1.7;margin:0">
+              O Consultor Farmer é responsável por cultivar e expandir a carteira de clientes ativos da AMV — uma das funções mais estratégicas da corretora. Diferente do papel de captação, o Farmer foca em aprofundar o relacionamento com empresas que já confiam na AMV, identificando oportunidades de renovação, retenção e ampliação de contratos. É um papel externo, de presença constante no campo.
+            </p>
+          </div>
+          <div class="job-desc-section">
+            <h4>O que você vai fazer no dia a dia</h4>
+            <ul>
+              <li>Visitar presencialmente clientes ativos na carteira (DF e entorno) — rotina de campo frequente</li>
+              <li>Conduzir reuniões de acompanhamento, renovações e apresentação de alternativas de planos</li>
+              <li>Identificar oportunidades de upsell e cross-sell dentro da base de clientes</li>
+              <li>Registrar todas as interações e atualizações no CRM</li>
+              <li>Apoiar clientes em dúvidas operacionais sobre planos, reajustes e mudanças contratuais</li>
+              <li>Trabalhar em conjunto com o Backoffice e o time de Renovações para garantir a fidelização</li>
+              <li>Acompanhar indicadores de retenção e satisfação da carteira</li>
+            </ul>
+          </div>
+          <div class="job-desc-section">
+            <h4>Perfil que buscamos</h4>
+            <ul>
+              <li>Comunicação persuasiva e relacionamento interpessoal forte</li>
+              <li>Orientação a resultados e metas — perfil de quem gosta de ser cobrado e cobrar de si mesmo</li>
+              <li>Capacidade de organização para gerir uma carteira ativa de clientes</li>
+              <li>Proatividade para identificar oportunidades sem esperar o cliente ligar</li>
+              <li>Experiência ou grande interesse na área comercial de saúde/benefícios</li>
+            </ul>
+          </div>
+          <div class="job-desc-section">
+            <h4>Remuneração e benefícios</h4>
+            <ul>
+              <li>Remuneração: fixo + comissão por renovações e expansões de carteira · Regime CLT</li>
+              <li>Vale alimentação e vale transporte</li>
+              <li>Plano de saúde empresarial (após período de experiência)</li>
+              <li>Horário: segunda a sexta, com flexibilidade para visitas externas</li>
+            </ul>
+          </div>
+          <div class="job-desc-section">
+            <h4 style="color:var(--warn)">Requisitos obrigatórios</h4>
+            <p style="font-size:.83rem;color:var(--fg-3);margin:0 0 10px">Estes requisitos são inegociáveis para o exercício da função. Antes de se candidatar, confirme que você os atende.</p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="req-item">
+                <div class="req-item-text"><div class="req-item-title">CNH válida (categoria B ou superior)</div>Necessária para deslocamentos diários em visitas a clientes.</div>
+              </div>
+              <div class="req-item">
+                <div class="req-item-text"><div class="req-item-title">Veículo próprio disponível para uso profissional</div>Visitas externas fazem parte da rotina da função — a AMV reembolsa combustível e manutenção conforme política interna.</div>
+              </div>
+              <div class="req-item">
+                <div class="req-item-text"><div class="req-item-title">Disponibilidade para visitas externas frequentes</div>A rotina inclui saídas de campo regulares no DF e entorno — não é uma função 100% presencial no escritório.</div>
+              </div>
+              <div class="req-item">
+                <div class="req-item-text"><div class="req-item-title">Disponibilidade de jornada compatível com horário comercial</div>Segunda a sexta, com flexibilidade para o horário de visitas externas conforme agenda de clientes.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Confirmação de leitura <span class="req">*</span></label>
+          <label class="check-item" id="labelLeuDesc">
+            <input type="checkbox" id="leu_descritivo" name="leu_descritivo" onchange="updateCheckStyle('labelLeuDesc','leu_descritivo'); if(this.checked) document.getElementById('err_leu_desc').style.display='none';">
+            <div class="check-item-text">
+              <div class="check-item-title">Li o descritivo completo e confirmo que atendo todos os requisitos obrigatórios</div>
+              <div class="check-item-sub">CNH válida, veículo próprio, disponibilidade para campo e horário comercial.</div>
+            </div>
+          </label>
+          <span class="err-msg" id="err_leu_desc">Você precisa confirmar a leitura e os requisitos para avançar.</span>
+        </div>
+      </div>
+
+      <!-- STEP 3: Trajetória e motivação -->
+      <div class="step-card" id="step3" hidden>
+        <div class="step-eyebrow">Etapa 3 de 7</div>
+        <h2 class="step-title">Trajetória e motivação</h2>
+        <p class="step-desc">Conte sobre sua história profissional e por que você busca essa oportunidade agora.</p>
+        <div class="field-group">
+          <div class="field">
+            <label for="q8_trajetoria">Conte brevemente sua trajetória profissional e suas atividades atuais <span class="req">*</span></label>
+            <p class="hint">Inclua experiências dentro ou fora da AMV que possam contribuir para a função de Consultor Farmer.</p>
+            <textarea id="q8_trajetoria" name="q8_trajetoria" class="tall" required placeholder="Descreva sua trajetória…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <div class="field">
+            <label for="q9_por_que">Por que você quer atuar como Consultor Farmer e por que busca essa oportunidade agora? <span class="req">*</span></label>
+            <textarea id="q9_por_que" name="q9_por_que" class="tall" required placeholder="Explique sua motivação…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label>Conte uma iniciativa sua que resultou em um relacionamento mais sólido com um cliente, colega ou parceiro <span class="req">*</span></label>
+            <p class="hint">Pode ser de qualquer contexto — o importante é mostrar sua capacidade de construir e cultivar relacionamentos.</p>
+            <div class="sub-group">
+              <div class="field">
+                <div class="sub-group-label">Situação</div>
+                <textarea id="q10a_situacao" name="q10a_situacao" required placeholder="Qual era o contexto?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <div class="sub-group-label">O que você fez pessoalmente</div>
+                <textarea id="q10b_o_que_fez" name="q10b_o_que_fez" required placeholder="Descreva sua ação…"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <div class="sub-group-label">Resultado</div>
+                <textarea id="q10c_resultado" name="q10c_resultado" required placeholder="O que aconteceu?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Visão e aprendizado -->
+      <div class="step-card" id="step4" hidden>
+        <div class="step-eyebrow">Etapa 4 de 7</div>
+        <h2 class="step-title">Visão e aprendizado</h2>
+        <p class="step-desc">Queremos entender como você enxerga a função de Farmer e sua disposição para crescer.</p>
+        <div class="field-group">
+          <div class="field">
+            <label for="q11_dia_a_dia">Como você enxerga o dia a dia do Consultor Farmer? <span class="req">*</span></label>
+            <p class="hint">Fale sobre a rotina de campo, gestão de carteira, metas e contribuição para a retenção de clientes.</p>
+            <textarea id="q11_dia_a_dia" name="q11_dia_a_dia" class="tall" required placeholder="Descreva como você imagina o dia a dia…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label>Conte uma situação em que aplicou uma orientação ou feedback <span class="req">*</span></label>
+            <p class="hint">Pode ser de qualquer contexto profissional ou de desenvolvimento pessoal.</p>
+            <div class="sub-group">
+              <div class="field">
+                <div class="sub-group-label">Orientação recebida</div>
+                <textarea id="q12a_orientacao" name="q12a_orientacao" required placeholder="Qual foi a orientação ou feedback?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <div class="sub-group-label">Mudança que você fez</div>
+                <textarea id="q12b_mudanca" name="q12b_mudanca" required placeholder="Como você ajustou seu comportamento ou trabalho?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <div class="sub-group-label">Resultado ou aprendizado</div>
+                <textarea id="q12c_resultado_fb" name="q12c_resultado_fb" required placeholder="O que você observou após a mudança?"></textarea>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: Renda -->
+      <div class="step-card" id="step5" hidden>
+        <div class="step-eyebrow">Etapa 5 de 7</div>
+        <h2 class="step-title">Plano de crescimento — Renda</h2>
+        <p class="step-desc">As informações de renda servem para planejamento e conversas de desenvolvimento. Não representam promessa de remuneração e não definem aptidão para a vaga.</p>
+        <div class="field-group">
+          <div class="field">
+            <label for="o1_renda_atual">Qual é sua renda profissional média mensal atual? <span class="req">*</span></label>
+            <p class="hint">Informe a média bruta dos últimos 3 meses: salário + variáveis, sem benefícios.</p>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--fg-3);font-weight:600">R$</span>
+              <input type="number" id="o1_renda_atual" name="o1_renda_atual" min="0" step="0.01" required placeholder="0,00" oninput="onRendaAtualChange()">
+            </div>
+            <span class="err-msg">Informe sua renda atual.</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label style="font-size:.9rem;font-weight:700;color:var(--fg)">Composição da renda familiar mensal</label>
+            <p class="hint">Considere somente as pessoas que compartilham o orçamento da casa.</p>
+            <div class="sub-group" style="margin-top:10px">
+              <div class="field">
+                <label for="o2a_renda_propria">Sua renda mensal <span class="req">*</span></label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="color:var(--fg-3);font-weight:600">R$</span>
+                  <input type="number" id="o2a_renda_propria" name="o2a_renda_propria" min="0" step="0.01" required placeholder="0,00" oninput="calcTotal()">
+                </div>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+              <div class="field">
+                <label>Renda mensal do cônjuge <span class="req">*</span></label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.85rem;font-weight:500">
+                    <input type="checkbox" id="o2b_na" onchange="toggleConjuge()"> Não se aplica
+                  </label>
+                  <div style="display:flex;align-items:center;gap:8px" id="o2bWrap">
+                    <span style="color:var(--fg-3);font-weight:600">R$</span>
+                    <input type="number" id="o2b_conjuge" name="o2b_conjuge" min="0" step="0.01" placeholder="0,00" oninput="calcTotal()">
+                  </div>
+                </div>
+                <span class="err-msg" id="err_o2b">Informe a renda do cônjuge ou marque "Não se aplica".</span>
+              </div>
+              <div class="field">
+                <label for="o2c_outras">Outras rendas que compõem o orçamento da casa <span class="req">*</span></label>
+                <p class="hint">Não repita sua renda nem a do cônjuge. Informe R$ 0,00 se não houver outras.</p>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="color:var(--fg-3);font-weight:600">R$</span>
+                  <input type="number" id="o2c_outras" name="o2c_outras" min="0" step="0.01" required placeholder="0,00" oninput="calcTotal()">
+                </div>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+          <div class="income-total">
+            <span class="income-total-label">Total da renda familiar mensal</span>
+            <span class="income-total-value" id="o2dDisplay">R$ 0,00</span>
+          </div>
+          <hr class="divider">
+          <div class="field">
+            <label style="font-size:.9rem;font-weight:700;color:var(--fg)">Renda profissional mensal pretendida</label>
+            <p class="hint">Valores brutos mensais (fixo + variável), sem benefícios.</p>
+            <div class="sub-group" style="margin-top:10px">
+              <div class="field-2col">
+                <div class="field">
+                  <label for="o3a_1ano">Em 1 ano <span class="req">*</span></label>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="color:var(--fg-3);font-weight:600">R$</span>
+                    <input type="number" id="o3a_1ano" name="o3a_1ano" min="0" step="0.01" required placeholder="0,00">
+                  </div>
+                  <span class="err-msg">Campo obrigatório.</span>
+                </div>
+                <div class="field">
+                  <label for="o3b_3anos">Em 3 anos <span class="req">*</span></label>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="color:var(--fg-3);font-weight:600">R$</span>
+                    <input type="number" id="o3b_3anos" name="o3b_3anos" min="0" step="0.01" required placeholder="0,00">
+                  </div>
+                  <span class="err-msg">Campo obrigatório.</span>
+                </div>
+              </div>
+              <div class="field">
+                <label for="o3c_5anos">Em 5 anos <span class="req">*</span></label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="color:var(--fg-3);font-weight:600">R$</span>
+                  <input type="number" id="o3c_5anos" name="o3c_5anos" min="0" step="0.01" required placeholder="0,00">
+                </div>
+                <span class="err-msg">Campo obrigatório.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: Objetivos -->
+      <div class="step-card" id="step6" hidden>
+        <div class="step-eyebrow">Etapa 6 de 7</div>
+        <h2 class="step-title">Plano de crescimento — Objetivos</h2>
+        <p class="step-desc">Informe pelo menos um objetivo. Você pode adicionar até três.</p>
+        <div class="field-group">
+          <div id="objectivesContainer"></div>
+          <button type="button" class="btn-add-obj" id="btnAddObj" onclick="addObjective()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Adicionar objetivo
+          </button>
+          <hr class="divider">
+          <div class="field">
+            <label for="o5a_conexao">Após conhecer a rotina e a remuneração da vaga, como você enxerga essa oportunidade dentro do seu plano profissional? <span class="req">*</span></label>
+            <textarea id="o5a_conexao" name="o5a_conexao" class="tall" required placeholder="Descreva como esta oportunidade se encaixa no seu plano…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+          <div class="field">
+            <label for="o5b_competencias">Como o desenvolvimento na função pode contribuir para seus objetivos? <span class="req">*</span></label>
+            <textarea id="o5b_competencias" name="o5b_competencias" class="tall" required placeholder="Descreva as competências e hábitos que quer desenvolver…"></textarea>
+            <span class="err-msg">Campo obrigatório.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 7: Encerramento -->
+      <div class="step-card" id="step7" hidden>
+        <div class="step-eyebrow">Etapa 7 de 7</div>
+        <h2 class="step-title">Encerramento</h2>
+        <p class="step-desc">Últimas informações antes de enviar sua candidatura.</p>
+        <div class="field-group">
+          <div class="field">
+            <label>Confirmação final <span class="req">*</span></label>
+            <label class="check-item" id="labelQ16A">
+              <input type="checkbox" id="q16a_leu" name="q16a_leu" onchange="updateCheckStyle('labelQ16A','q16a_leu'); if(this.checked) document.getElementById('err_q16a').style.display='none';">
+              <div class="check-item-text">
+                <div class="check-item-title">Li os descritivos da função e confirmo que atendo os requisitos obrigatórios</div>
+                <div class="check-item-sub">CNH, veículo próprio, disponibilidade para campo e horário comercial.</div>
+              </div>
+            </label>
+            <span class="err-msg" id="err_q16a">Você precisa confirmar a leitura e os requisitos antes de enviar.</span>
+          </div>
+          <div class="field">
+            <label for="q16b_esclarecer">Há alguma condição que você precisa esclarecer antes de avançar? (opcional)</label>
+            <textarea id="q16b_esclarecer" name="q16b_esclarecer" placeholder="Se tiver dúvidas ou condições a esclarecer, descreva aqui…"></textarea>
+          </div>
+          <div class="field">
+            <label for="q17_mais_algo">Há algo mais que gostaria de compartilhar sobre sua candidatura? (opcional)</label>
+            <textarea id="q17_mais_algo" name="q17_mais_algo" placeholder="Informações adicionais que considera relevantes…"></textarea>
+          </div>
+          <div class="alert alert-warn" style="font-size:.85rem">
+            <strong>Atenção:</strong> Ao enviar, sua liderança atual será comunicada sobre sua inscrição. A candidatura não garante avanço, aprovação ou transferência. Quem avançar será contatado para entrevistas e avaliação prática.
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+    <div class="nav-bar" id="navBar">
+      <button type="button" class="btn btn-secondary" id="btnBack" onclick="goBack()" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Voltar
+      </button>
+      <span class="nav-step-info" id="navStepInfo"></span>
+      <button type="button" class="btn btn-primary" id="btnNext" onclick="goNext()">
+        Próximo
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button type="button" class="btn btn-primary btn-lg" id="btnSubmit" hidden onclick="handleSubmit()">
+        Enviar candidatura
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+
+  </div>
+
+  <div id="screenSuccess" class="screen">
+    <div class="success-screen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Candidatura registrada!</h2>
+      <p>Recebemos sua manifestação de interesse na vaga de Consultor Farmer. Sua candidatura será pré-analisada e você receberá retorno pelo contato informado. Quem avançar receberá orientações sobre entrevistas e avaliação prática.</p>
+      <div class="alert alert-info" style="font-size:.83rem;margin-bottom:20px" id="emailAlert">
+        <strong>📧 Relatório de candidatura gerado.</strong> Copie o texto abaixo para registros.
+      </div>
+      <strong style="font-size:.82rem;color:var(--fg-3);text-transform:uppercase;letter-spacing:.05em">Relatório completo</strong>
+      <div class="report-box" id="reportBox"></div>
+      <button class="btn-copy" onclick="copyReport()" id="btnCopy">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copiar relatório
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJpwczgMGSHzavEMDavgdTXS9Ykp6UYL8wjcbVox195MrlMWWLXA0bKrgoVxZ3wNoUDw/exec';
+const VAGA = 'Consultor Farmer';
+const OPEN_DATE  = new Date('2026-10-20T00:00:00-03:00');
+const CLOSE_DATE = new Date('2026-10-27T23:59:59-03:00');
+
+const COLABORADORES = [
+  {nome:"Amanda de Souza Ramos",area:"Administrativo",admissao:"2023-11-06",email:"amanda@corretoraamoravida.com.br",gestor:""},
+  {nome:"Andre Luiza Silva Souza",area:"Diretoria",admissao:"2015-01-01",email:"andre@corretoraamoravida.com.br",gestor:""},
+  {nome:"Bianca Stephanie Rodrigues de Morais",area:"BackOffice",admissao:"2026-03-09",email:"bianca@corretoraamoravida.com.br",gestor:"Luiza Lima Dornelles"},
+  {nome:"Caio Miguel de Souza Assis",area:"Administrativo",admissao:"2025-01-15",email:"caio@corretoraamoravida.com.br",gestor:""},
+  {nome:"Dayane Silveira Carlos Souza",area:"Diretoria",admissao:"2021-08-01",email:"dayane@corretoraamoravida.com.br",gestor:""},
+  {nome:"Dhiana da Silva Oliveira",area:"Comercial Saúde",admissao:"2026-08-10",email:"dhiana@corretoraamoravida.com.br",gestor:""},
+  {nome:"Diego de Araújo Lima",area:"Diretoria",admissao:"2024-08-01",email:"diegolima@corretoraamoravida.com.br",gestor:""},
+  {nome:"Erica Rodrigues de Souza",area:"Administrativo",admissao:"2020-09-17",email:"erica@corretoraamoravida.com.br",gestor:""},
+  {nome:"Fernanda Souza Rosa",area:"Pré-Vendas",admissao:"2026-07-06",email:"fernanda@corretoraamoravida.com.br",gestor:"Luiza Lima Dornelles"},
+  {nome:"Gabriela Moura Rabelo",area:"Administrativo",admissao:"2021-11-03",email:"gabriela@corretoraamoravida.com.br",gestor:""},
+  {nome:"Geovanna Rocha Mendonça",area:"Administrativo",admissao:"2024-10-21",email:"geovanna@corretoraamoravida.com.br",gestor:""},
+  {nome:"Giselle Cristina Gomes Farias",area:"Comercial Saúde",admissao:"2022-03-04",email:"giselle@corretoraamoravida.com.br",gestor:"Thaís Araújo Rebouças"},
+  {nome:"Isabele Lustosa da Silva",area:"Comercial Saúde",admissao:"2026-05-18",email:"isabele@corretoraamoravida.com.br",gestor:"Luiza Lima Dornelles"},
+  {nome:"Jessica do Monte Meira",area:"Gerência",admissao:"2020-08-25",email:"jessicameira@corretoraamoravida.com.br",gestor:""},
+  {nome:"Kaike Augusto Nunes Daltro",area:"Comercial Saúde",admissao:"2026-01-05",email:"kaike@corretoraamoravida.com.br",gestor:"Luiza Lima Dornelles"},
+  {nome:"Kariny Coelho Mendes da Silva",area:"Comercial Saúde",admissao:"2025-04-01",email:"kariny@corretoraamoravida.com.br",gestor:"Luiza Lima Dornelles"},
+  {nome:"Kelly Cristina Oliveira Gomes",area:"Administrativo",admissao:"2022-04-04",email:"kelly@corretoraamoravida.com.br",gestor:""},
+  {nome:"Kezia de Almeida Marques",area:"Comercial Saúde",admissao:"2026-05-18",email:"kezia@corretoraamoravida.com.br",gestor:"Thaís Araújo Rebouças"},
+  {nome:"Larissa Karen do Nascimento da Silva",area:"Administrativo",admissao:"2026-06-01",email:"larissa@corretoraamoravida.com.br",gestor:""},
+  {nome:"Leandro Humberto de Souza França",area:"Diretoria",admissao:"2022-07-01",email:"leandro@corretoraamoravida.com.br",gestor:""},
+  {nome:"Leticia Santos Franca",area:"Pré-Vendas",admissao:"2026-04-13",email:"leticiasantos@corretoraamoravida.com.br",gestor:"Thaís Araújo Rebouças"},
+  {nome:"Luciane Mota Monteiro",area:"Administrativo",admissao:"2026-01-05",email:"luciane@corretoraamoravida.com.br",gestor:""},
+  {nome:"Luiza Lima Dornelles",area:"Gerência",admissao:"2025-01-15",email:"luiza@corretoraamoravida.com.br",gestor:""},
+  {nome:"Marcelo dos Santos de Oliveira",area:"Administrativo",admissao:"2024-08-05",email:"marcelo@corretoraamoravida.com.br",gestor:""},
+  {nome:"Maria Eduarda da Silva de Sa",area:"Marketing",admissao:"2026-05-11",email:"mariaeduarda@corretoraamoravida.com.br",gestor:"Diego de Araújo Lima"},
+  {nome:"Marjorie Araujo Guimaraes",area:"BackOffice",admissao:"2025-08-04",email:"marjorie@corretoraamoravida.com.br",gestor:"Thaís Araújo Rebouças"},
+  {nome:"Matheus Oliveira Ribeiro",area:"Administrativo",admissao:"2024-03-13",email:"matheus@corretoraamoravida.com.br",gestor:""},
+  {nome:"Milene Virna Vieira Costa",area:"Administrativo",admissao:"2026-09-28",email:"milene@corretoraamoravida.com.br",gestor:""},
+  {nome:"Rodrigo Henrique Veras",area:"Comercial Saúde",admissao:"2023-11-06",email:"rodrigo@corretoraamoravida.com.br",gestor:"Thaís Araújo Rebouças"},
+  {nome:"Sarah Beatriz de Souza Francelino",area:"Pré-Vendas",admissao:"2026-04-13",email:"sarahbeatriz@corretoraamoravida.com.br",gestor:"Thaís Araújo Rebouças"},
+  {nome:"Thaís Araújo Rebouças",area:"Diretoria",admissao:"2022-07-01",email:"thais@corretoraamoravida.com.br",gestor:""},
+  {nome:"Vitor Lorran Lopes de Macedo",area:"Comercial Saúde",admissao:"2026-01-05",email:"vitor@corretoraamoravida.com.br",gestor:"Thaís Araújo Rebouças"},
+];
+
+const ALL_STEPS = [1,2,3,4,5,6,7];
+let currentStep = 1;
+let objIds = [];
+let submitting = false;
+let reportText = '';
+
+function getNextStep(s) { const i=ALL_STEPS.indexOf(s); return i<ALL_STEPS.length-1?ALL_STEPS[i+1]:null; }
+function getPrevStep(s) { const i=ALL_STEPS.indexOf(s); return i>0?ALL_STEPS[i-1]:null; }
+
+function initLookupSelect() {
+  const sel = document.getElementById('lookupSelect');
+  const excluidos = ['Diretoria','Gerência'];
+  COLABORADORES.forEach((c,i)=>{
+    if(excluidos.includes(c.area)) return;
+    const opt=document.createElement('option'); opt.value=i; opt.textContent=c.nome; sel.appendChild(opt);
+  });
+}
+
+function init() {
+  checkDeadline(); initObjectives(); initLookupSelect(); updateProgress(); updateNav(); restoreSession();
+  document.getElementById('mainForm').addEventListener('input',saveSession);
+  document.getElementById('mainForm').addEventListener('change',saveSession);
+}
+
+function checkDeadline() {
+  const now=new Date();
+  if(now<OPEN_DATE) showScreen('screenNotOpen');
+  else if(now>CLOSE_DATE) showScreen('screenClosed');
+  else showScreen('screenForm');
+}
+
+function showScreen(id) {
+  ['screenNotOpen','screenClosed','screenForm','screenSuccess'].forEach(s=>{
+    const el=document.getElementById(s); if(el) el.classList.remove('active');
+  });
+  const target=document.getElementById(id); if(target) target.classList.add('active');
+}
+
+function applyColaborador(idx) {
+  const filled=document.getElementById('lookupFilled');
+  if(idx===''){if(filled) filled.style.display='none';return;}
+  const c=COLABORADORES[parseInt(idx,10)]; if(!c) return;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v;};
+  set('q_nome',c.nome); set('q_area',c.area); set('q_entrada',c.admissao); set('q_email',c.email);
+  if(c.gestor) set('q_gestor',c.gestor);
+  if(filled) filled.style.display='block';
+}
+
+function updateCheckStyle(labelId,inputId) {
+  const label=document.getElementById(labelId), input=document.getElementById(inputId);
+  if(label&&input) label.classList.toggle('selected',input.checked);
+}
+
+function toggleConjuge() {
+  const na=document.getElementById('o2b_na').checked;
+  const wrap=document.getElementById('o2bWrap'), inp=document.getElementById('o2b_conjuge');
+  wrap.hidden=na; inp.required=!na; if(na) inp.value=''; calcTotal();
+}
+
+function onRendaAtualChange() {
+  const v=document.getElementById('o1_renda_atual').value;
+  const o2a=document.getElementById('o2a_renda_propria');
+  if(o2a&&!o2a.value) o2a.value=v; calcTotal();
+}
+
+function calcTotal() {
+  const a=parseFloat(document.getElementById('o2a_renda_propria')?.value)||0;
+  const na=document.getElementById('o2b_na')?.checked;
+  const b=na?0:(parseFloat(document.getElementById('o2b_conjuge')?.value)||0);
+  const c=parseFloat(document.getElementById('o2c_outras')?.value)||0;
+  const disp=document.getElementById('o2dDisplay');
+  if(disp) disp.textContent=formatBRL(a+b+c);
+}
+
+function initObjectives() { addObjective(); }
+
+function addObjective() {
+  if(objIds.length>=3) return;
+  const id=Date.now(); objIds.push(id);
+  const n=objIds.length; const container=document.getElementById('objectivesContainer');
+  const div=document.createElement('div'); div.className='objective-block'; div.id=`obj_${id}`;
+  div.innerHTML=`
+    <div class="objective-header">
+      <span class="objective-num">Objetivo ${n}</span>
+      ${n>1?`<button type="button" class="btn-remove-obj" onclick="removeObjective(${id})">Remover</button>`:''}
+    </div>
+    <div class="field-group">
+      <div class="field-2col">
+        <div class="field"><label for="o4_sonho_${id}">Sonho ou objetivo <span class="req">*</span></label>
+          <input type="text" id="o4_sonho_${id}" name="o4_sonho_${id}" required placeholder="Ex.: comprar um carro">
+          <span class="err-msg">Campo obrigatório.</span></div>
+        <div class="field"><label for="o4_custo_${id}">Custo estimado <span class="req">*</span></label>
+          <div style="display:flex;align-items:center;gap:6px"><span style="color:var(--fg-3);font-size:.85rem;font-weight:600">R$</span>
+          <input type="number" id="o4_custo_${id}" name="o4_custo_${id}" min="0" step="0.01" required placeholder="0,00" style="max-width:160px"></div>
+          <span class="err-msg">Campo obrigatório.</span></div>
+      </div>
+      <div class="field-2col">
+        <div class="field"><label for="o4_prazo_${id}">Prazo pretendido <span class="req">*</span></label>
+          <input type="text" id="o4_prazo_${id}" name="o4_prazo_${id}" required placeholder="Ex.: em 3 anos">
+          <span class="err-msg">Campo obrigatório.</span></div>
+        <div class="field"><label for="o4_prio_${id}">Prioridade <span class="req">*</span></label>
+          <select id="o4_prio_${id}" name="o4_prio_${id}" required>
+            <option value="">Selecione…</option><option>Alta</option><option>Média</option><option>Baixa</option>
+          </select><span class="err-msg">Selecione a prioridade.</span></div>
+      </div>
+      <div class="field"><label for="o4_acao_${id}">Qual ação você pretende começar nos próximos 90 dias para avançar nesse objetivo? <span class="req">*</span></label>
+        <textarea id="o4_acao_${id}" name="o4_acao_${id}" required placeholder="Ex.: iniciar uma reserva mensal…"></textarea>
+        <span class="err-msg">Campo obrigatório.</span></div>
+    </div>`;
+  container.appendChild(div); updateAddObjBtn();
+}
+
+function removeObjective(id) {
+  const idx=objIds.indexOf(id); if(idx<1) return; objIds.splice(idx,1);
+  document.getElementById(`obj_${id}`)?.remove();
+  document.querySelectorAll('.objective-block').forEach((el,i)=>{el.querySelector('.objective-num').textContent=`Objetivo ${i+1}`;});
+  updateAddObjBtn(); saveSession();
+}
+
+function updateAddObjBtn() { const btn=document.getElementById('btnAddObj'); if(btn) btn.hidden=objIds.length>=3; }
+
+function goNext() { if(!validateStep(currentStep)) return; const next=getNextStep(currentStep); if(next){currentStep=next;updateProgress();updateNav();showCurrentStep();scrollToTop();} }
+function goBack() { const prev=getPrevStep(currentStep); if(prev!==null){currentStep=prev;updateProgress();updateNav();showCurrentStep();scrollToTop();} }
+
+function showCurrentStep() { ALL_STEPS.forEach(s=>{const el=document.getElementById(`step${s}`);if(el) el.hidden=(s!==currentStep);}); }
+function scrollToTop() { window.scrollTo({top:0,behavior:'smooth'}); }
+
+function updateNav() {
+  const isFirst=currentStep===ALL_STEPS[0], isLast=currentStep===ALL_STEPS[ALL_STEPS.length-1];
+  document.getElementById('btnBack').disabled=isFirst;
+  document.getElementById('btnNext').hidden=isLast;
+  document.getElementById('btnSubmit').hidden=!isLast;
+  const idx=ALL_STEPS.indexOf(currentStep)+1;
+  document.getElementById('navStepInfo').textContent=`${idx} de ${ALL_STEPS.length}`;
+}
+
+function updateProgress() {
+  const total=ALL_STEPS.length, idx=ALL_STEPS.indexOf(currentStep)+1;
+  const pct=Math.round((idx/total)*100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progressCount').textContent=`Etapa ${idx} de ${total}`;
+  const dots=document.getElementById('progressDots'); dots.innerHTML='';
+  ALL_STEPS.forEach((_,i)=>{ const d=document.createElement('div'); d.className='progress-dot';
+    if(i<idx-1) d.classList.add('done'); else if(i===idx-1) d.classList.add('active'); dots.appendChild(d); });
+}
+
+function validateStep(step) {
+  let ok=true;
+  if(step===1) { ok=validateRequired(['q_nome','q_area','q_cargo','q_entrada','q_gestor'])&&ok; ok=validateEmail('q_email')&&ok; }
+  if(step===2) { const leu=document.getElementById('leu_descritivo')?.checked; const errLeu=document.getElementById('err_leu_desc'); if(!leu){errLeu.style.display='block';ok=false;}else{errLeu.style.display='none';} }
+  if(step===3) ok=validateRequired(['q8_trajetoria','q9_por_que','q10a_situacao','q10b_o_que_fez','q10c_resultado'])&&ok;
+  if(step===4) ok=validateRequired(['q11_dia_a_dia','q12a_orientacao','q12b_mudanca','q12c_resultado_fb'])&&ok;
+  if(step===5) {
+    ok=validateRequired(['o1_renda_atual','o2a_renda_propria','o2c_outras','o3a_1ano','o3b_3anos','o3c_5anos'])&&ok;
+    const na=document.getElementById('o2b_na')?.checked;
+    if(!na){const o2b=document.getElementById('o2b_conjuge'),err=document.getElementById('err_o2b');if(!o2b.value){if(err)err.style.display='block';ok=false;}else{if(err)err.style.display='none';}}
+  }
+  if(step===6) {
+    document.querySelectorAll('.objective-block').forEach(block=>{block.querySelectorAll('[required]').forEach(inp=>{const empty=!inp.value.trim();markError(inp,empty);if(empty)ok=false;});});
+    ok=validateRequired(['o5a_conexao','o5b_competencias'])&&ok;
+  }
+  if(step===7) { const leu=document.getElementById('q16a_leu')?.checked; const errLeu=document.getElementById('err_q16a'); if(!leu){errLeu.style.display='block';ok=false;}else{errLeu.style.display='none';} }
+  if(!ok){const firstErr=document.querySelector(`#step${step} .has-error, #step${step} .err-msg[style*="block"]`);if(firstErr)firstErr.scrollIntoView({behavior:'smooth',block:'center'});}
+  return ok;
+}
+
+function validateRequired(ids) { let ok=true; ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;const empty=!el.value.trim();markError(el,empty);if(empty)ok=false;}); return ok; }
+function validateEmail(id) { const el=document.getElementById(id);if(!el)return true; const valid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());markError(el,!valid);return valid; }
+function markError(el,hasError) { const field=el.closest('.field');if(field)field.classList.toggle('has-error',hasError); }
+
+function saveSession() {
+  try{const data={};
+    document.getElementById('mainForm').querySelectorAll('[id]').forEach(el=>{
+      if(el.type==='checkbox') data[el.id]=el.checked;
+      else if(el.type==='radio'){if(el.checked)data['radio_'+el.name]=el.value;}
+      else data[el.id]=el.value;
+    });
+    data['__step']=currentStep;
+    sessionStorage.setItem('amv_farmer_draft',JSON.stringify(data));
+  }catch(e){}
+}
+
+function restoreSession() {
+  try{const raw=sessionStorage.getItem('amv_farmer_draft');if(!raw)return;
+    const data=JSON.parse(raw);
+    Object.entries(data).forEach(([key,val])=>{
+      if(key==='__step') return;
+      if(key.startsWith('radio_')){document.querySelectorAll(`input[name="${key.slice(6)}"]`).forEach(r=>{r.checked=r.value===val;});}
+      else{const el=document.getElementById(key);if(!el)return;if(el.type==='checkbox')el.checked=val;else el.value=val;}
+    });
+    const savedStep=data.__step;
+    if(savedStep&&ALL_STEPS.includes(savedStep)) currentStep=savedStep;
+    showCurrentStep();updateProgress();updateNav();calcTotal();toggleConjuge();
+  }catch(e){}
+}
+
+async function handleSubmit() {
+  if(submitting) return;
+  if(!validateStep(7)) return;
+  submitting=true;
+  const btn=document.getElementById('btnSubmit');
+  btn.disabled=true; btn.textContent='Enviando…';
+  const report=buildReport(); reportText=report;
+  if(APPS_SCRIPT_URL){
+    try{
+      await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({assunto:`CANDIDATURA — ${VAGA} | ${val('q_nome')}`,
+          candidato_nome:val('q_nome'),candidato_email:val('q_email'),
+          candidato_area:`${val('q_area')} / ${val('q_cargo')}`,funcoes:VAGA,
+          gestor:val('q_gestor'),relatorio:report})});
+      document.getElementById('emailAlert').innerHTML='<strong>✅ E-mail enviado automaticamente</strong> para Leandro, Thaís, Diego e Jessica.';
+    }catch(e){
+      document.getElementById('emailAlert').innerHTML='⚠ Não foi possível enviar o e-mail automaticamente. Copie o relatório abaixo e envie manualmente.';
+    }
+  }
+  try{sessionStorage.removeItem('amv_farmer_draft');}catch(e){}
+  document.getElementById('reportBox').textContent=report;
+  showScreen('screenSuccess'); window.scrollTo({top:0,behavior:'smooth'}); submitting=false;
+}
+
+function buildReport() {
+  const now=new Date();
+  const dataHora=now.toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})+' (Brasília)';
+  const id=Math.random().toString(36).slice(2,8).toUpperCase();
+  let r='';
+  r+='═══════════════════════════════════════════════════\n';
+  r+='  CANDIDATURA INTERNA — CORRETORA AMOR À VIDA\n';
+  r+='═══════════════════════════════════════════════════\n\n';
+  r+=`Vaga: ${VAGA}\n\n`;
+  r+='─── RESUMO DA CANDIDATURA ──────────────────────────\n';
+  r+=`Colaborador:              ${val('q_nome')}\n`;
+  r+=`Área e cargo atuais:      ${val('q_area')} / ${val('q_cargo')}\n`;
+  r+=`Tempo de casa:            ${tempoNaEmpresa(val('q_entrada'))}\n`;
+  r+=`Identificador:            ${id}\n`;
+  r+=`Data/hora de recebimento: ${dataHora}\n`;
+  r+=`Data de entrada na AMV:   ${val('q_entrada')?formatDate(val('q_entrada')):'—'}\n`;
+  r+=`Gestor imediato atual:    ${val('q_gestor')}\n`;
+  r+=`Contato profissional:     ${val('q_email')}\n\n`;
+  r+='─── RESPOSTAS COMPLETAS ────────────────────────────\n\n';
+  r+='[8] TRAJETÓRIA PROFISSIONAL E ATIVIDADES ATUAIS\n'; r+=block(val('q8_trajetoria'))+'\n';
+  r+='[9] POR QUE CONSULTOR FARMER E POR QUE AGORA\n'; r+=block(val('q9_por_que'))+'\n';
+  r+='[10] INICIATIVA DE RELACIONAMENTO\n';
+  r+=`  Situação:\n${block(val('q10a_situacao'))}\n`;
+  r+=`  O que fez pessoalmente:\n${block(val('q10b_o_que_fez'))}\n`;
+  r+=`  Resultado:\n${block(val('q10c_resultado'))}\n`;
+  r+='[11] VISÃO DO DIA A DIA DA FUNÇÃO\n'; r+=block(val('q11_dia_a_dia'))+'\n';
+  r+='[12] ORIENTAÇÃO OU FEEDBACK APLICADO\n';
+  r+=`  Orientação recebida:\n${block(val('q12a_orientacao'))}\n`;
+  r+=`  Mudança que fez:\n${block(val('q12b_mudanca'))}\n`;
+  r+=`  Resultado/aprendizado:\n${block(val('q12c_resultado_fb'))}\n`;
+  r+='[16A] CONFIRMAÇÃO REQUISITOS: '+(document.getElementById('q16a_leu')?.checked?'Confirmado':'Não confirmado')+'\n\n';
+  const q16b=val('q16b_esclarecer');
+  r+='[16B] CONDIÇÕES A ESCLARECER:\n'+block(q16b||'Nenhuma')+'\n';
+  const q17=val('q17_mais_algo');
+  r+='[17] OBSERVAÇÕES ADICIONAIS:\n'+block(q17||'Nenhuma')+'\n';
+  r+='─── PLANO DE CRESCIMENTO ───────────────────────────\n\n';
+  r+='RENDA ATUAL\n';
+  r+=`  Renda profissional média mensal (bruta): ${formatBRL(val('o1_renda_atual'))}\n\n`;
+  r+='COMPOSIÇÃO DA RENDA FAMILIAR MENSAL\n';
+  r+=`  Sua renda:              ${formatBRL(val('o2a_renda_propria'))}\n`;
+  const naConj=document.getElementById('o2b_na')?.checked;
+  r+=`  Renda do cônjuge:       ${naConj?'Não se aplica':formatBRL(val('o2b_conjuge'))}\n`;
+  r+=`  Outras rendas:          ${formatBRL(val('o2c_outras'))}\n`;
+  const av=parseFloat(val('o2a_renda_propria'))||0, bv=naConj?0:(parseFloat(val('o2b_conjuge'))||0), cv=parseFloat(val('o2c_outras'))||0;
+  r+=`  Total familiar:         ${formatBRL(av+bv+cv)}\n\n`;
+  r+='RENDA PROFISSIONAL PRETENDIDA\n';
+  r+=`  Em 1 ano:  ${formatBRL(val('o3a_1ano'))}\n`;
+  r+=`  Em 3 anos: ${formatBRL(val('o3b_3anos'))}\n`;
+  r+=`  Em 5 anos: ${formatBRL(val('o3c_5anos'))}\n\n`;
+  r+='OBJETIVOS PESSOAIS E FINANCEIROS\n';
+  document.querySelectorAll('.objective-block').forEach((block_el,i)=>{
+    const bid=objIds[i];
+    r+=`  Objetivo ${i+1}: ${document.getElementById(`o4_sonho_${bid}`)?.value||''}\n`;
+    r+=`    Custo estimado: ${formatBRL(document.getElementById(`o4_custo_${bid}`)?.value||'')}\n`;
+    r+=`    Prazo: ${document.getElementById(`o4_prazo_${bid}`)?.value||''}  |  Prioridade: ${document.getElementById(`o4_prio_${bid}`)?.value||''}\n`;
+    r+=`    Ação nos próximos 90 dias:\n${indent(document.getElementById(`o4_acao_${bid}`)?.value||'')}\n`;
+  });
+  r+='\n[O5A] CONEXÃO COM O PLANO PROFISSIONAL\n'; r+=block(val('o5a_conexao'))+'\n';
+  r+='[O5B] COMPETÊNCIAS E HÁBITOS A DESENVOLVER\n'; r+=block(val('o5b_competencias'))+'\n';
+  r+='═══════════════════════════════════════════════════\n';
+  r+=`  FIM DO RELATÓRIO — ${dataHora}\n`;
+  r+='═══════════════════════════════════════════════════\n';
+  return r;
+}
+
+function val(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+function block(txt){return txt.split('\n').map(l=>'  '+l).join('\n')+'\n';}
+function indent(txt){return txt.split('\n').map(l=>'    '+l).join('\n');}
+function formatBRL(v){const n=parseFloat(v)||0;return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function formatDate(d){if(!d)return'';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;}
+function tempoNaEmpresa(d){if(!d)return'—';const inicio=new Date(d+'T00:00:00'),hoje=new Date();let m=(hoje.getFullYear()-inicio.getFullYear())*12+(hoje.getMonth()-inicio.getMonth());const anos=Math.floor(m/12),meses=m%12;if(anos>0&&meses>0)return`${anos} ano${anos>1?'s':''} e ${meses} mês${meses>1?'es':''}`;if(anos>0)return`${anos} ano${anos>1?'s':''}`;return`${meses} mês${meses>1?'es':''}`;}
+
+function copyReport() {
+  const btn=document.getElementById('btnCopy');
+  navigator.clipboard.writeText(reportText).then(()=>{btn.textContent='Copiado!';setTimeout(()=>{btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar relatório';},2000);}).catch(()=>{
+    const range=document.createRange(); range.selectNodeContents(document.getElementById('reportBox'));
+    const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+  });
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
