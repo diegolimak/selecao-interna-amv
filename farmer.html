@@ -870,8 +870,9 @@ async function handleSubmit() {
         body:JSON.stringify({assunto:`CANDIDATURA — ${VAGA} | ${val('q_nome')}`,
           candidato_nome:val('q_nome'),candidato_email:val('q_email'),
           candidato_area:`${val('q_area')} / ${val('q_cargo')}`,funcoes:VAGA,
-          gestor:val('q_gestor'),relatorio:report})});
-      document.getElementById('emailAlert').innerHTML='<strong>✅ E-mail enviado automaticamente</strong> para Leandro, Thaís, Diego e Jessica.';
+          gestor:val('q_gestor'),relatorio:report,
+          notify_cc:'andre@corretoraamoravida.com.br'})});
+      document.getElementById('emailAlert').innerHTML='<strong>✅ E-mail enviado automaticamente</strong> para Leandro, Thaís, Diego, Jessica e André.';
     }catch(e){
       document.getElementById('emailAlert').innerHTML='⚠ Não foi possível enviar o e-mail automaticamente. Copie o relatório abaixo e envie manualmente.';
     }
